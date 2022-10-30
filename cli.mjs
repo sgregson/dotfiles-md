@@ -1,1 +1,1 @@
-import "./scripts/vorpal.mjs";
+import "./src/vorpal.mjs";

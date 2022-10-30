@@ -11,7 +11,7 @@ import { toMdAST } from "./api.mjs";
 
 const CLI = Vorpal();
 const UUID = "dev.sgregson.dotfiles-cli";
-const DEFAULT_PATTERN = "demo/**/*.md";
+const DEFAULT_PATTERN = "**/*.md";
 const homeDirectory = os.homedir();
 
 CLI.history(UUID);
@@ -128,54 +128,79 @@ CLI.command("config", "configure your dotfiles application")
       });
   });
 
-CLI.command("run", "run a dotfiles build").action(async function cmdRun({
-  blockType,
-  ...args
-}) {
-  const { blockTypes } = await this.prompt({
-    name: "blockTypes",
-    type: "checkbox",
-    message: "select a block type : ",
-    choices: [{ value: "build", checked: true }, "run", "symlink"],
+CLI.command("run", "run a dotfiles build")
+  .option("-s, --selected <selected>", "Provide selected files")
+  .option("-a, --actions <actions>", "Provide codeblock action types")
+  .action(async function cmdRun({
+    blockType,
+    options: { selected, actions },
+    ...args
+  }) {
+    let blockTypes, blocks, blocksToRun;
+
+    // skip all UI prompts and bail
+    let { selected: pSelected, actions: pActions } = CLI.parse(process.argv, {
+      use: "minimist",
+    });
+    if (pSelected && pActions) {
+      blockTypes = pActions.split(",");
+      blocks = await getRunnableBlocks(pSelected.split(","));
+      blocksToRun = blocks.filter((block) =>
+        blockTypes.includes(block.options.action)
+      );
+
+      return Promise.all(
+        blocksToRun.map(async (b, i) => await executeBlock(b, i))
+      );
+    }
+
+    ({ blockTypes } = await this.prompt({
+      name: "blockTypes",
+      type: "checkbox",
+      message: "select a block type : ",
+      choices: [{ value: "build", checked: true }, "run", "symlink"],
+    }));
+
+    // CLI.log("block type(s):", blockTypes);
+    blocks = await getRunnableBlocks(state("selected"));
+    CLI.log("# blocks:", blocks.length);
+
+    ({ blocksToRun } = await this.prompt({
+      name: "blocksToRun",
+      type: "checkbox",
+      message: "Related Blocks : ",
+      choices: Array.from(
+        blocks.reduce((acc, blockData) => {
+          const prev = acc.has(blockData.source)
+            ? acc.get(blockData.source)
+            : [];
+          acc.set(blockData.source, prev.concat([blockData]));
+          return acc;
+        }, new Map())
+      )
+        .map(([filePath, fileBlocks]) => {
+          const runnableBlocks = fileBlocks.filter((b) => b?.options?.action);
+          return [
+            new inquirer.Separator(
+              `${filePath} (${runnableBlocks.length} of ${fileBlocks.length})`
+            ),
+            runnableBlocks.map((block) => ({
+              name: `${block.meta}\n   ${block.content
+                .split("\n")
+                .map((line) => `${line}`)
+                .join("(...)")}`,
+              value: block,
+              checked: blockTypes.includes(block.options.action),
+            })),
+          ];
+        })
+        .flat(2),
+    }));
+
+    return Promise.all(
+      blocksToRun.map(async (b, i) => await executeBlock(b, i))
+    );
   });
-
-  // CLI.log("block type(s):", blockTypes);
-  const blocks = await getRunnableBlocks(state("selected"));
-  CLI.log("# blocks:", blocks.length);
-
-  const { blocksToRun } = await this.prompt({
-    name: "blocksToRun",
-    type: "checkbox",
-    message: "Related Blocks : ",
-    choices: Array.from(
-      blocks.reduce((acc, blockData) => {
-        const prev = acc.has(blockData.source) ? acc.get(blockData.source) : [];
-        acc.set(blockData.source, prev.concat([blockData]));
-        return acc;
-      }, new Map())
-    )
-      .map(([filePath, fileBlocks]) => {
-        const runnableBlocks = fileBlocks.filter((b) => b?.options?.action);
-        return [
-          new inquirer.Separator(
-            `${filePath} (${runnableBlocks.length} of ${fileBlocks.length})`
-          ),
-          runnableBlocks.map((block) => ({
-            name: `${block.meta}\n   ${block.content
-              .split("\n")
-              .map((line) => `${line}`)
-              .join("(...)")}`,
-            value: block,
-            checked: blockTypes.includes(block.options.action),
-          })),
-        ];
-      })
-      .flat(2),
-  });
-
-  blocksToRun.forEach(executeBlock);
-  return Promise.resolve();
-});
 
 CLI.command("select", "Select dotfiles").action(async function cmdSelect(
   args,
@@ -209,7 +234,7 @@ CLI.command("clear", "clear screen").action(function cmdClear() {
 });
 
 // Run the app
-CLI.delimiter(statusBar()).show();
+CLI.delimiter(statusBar()).show().parse(process.argv);
 
 // ----------
 async function globAsync(pattern, options) {
@@ -289,7 +314,7 @@ async function executeBlock(block, i) {
       break;
     case "symlink":
       // make sure the build and target directory exists
-      const buildDir = path.join(process.cwd(), "build");
+      const buildDir = path.join(process.cwd(), "build", "links");
       const buildFile = path.join(
         buildDir,
         `${i}-${path.parse(maybeTarget).base}` // iteration to dedupe multiple symlinks in one file

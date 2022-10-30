@@ -9,7 +9,10 @@ import remarkGfm from "remark-gfm";
 import remarkFindReplace from "./remarkFindReplace.mjs";
 
 const env = dotenv.parse(
-  await fsPromises.readFile(path.resolve(process.cwd(), ".env"))
+  await fsPromises
+    .readFile(path.resolve(process.cwd(), ".env"))
+    // if file's missing, return an empty array
+    .catch(() => ({}))
 );
 
 export const toMdAST = await unified()
