@@ -1,8 +1,22 @@
-# Spencer's dotefiles
+# Literate Dotfiles
 
-In this dotfiles repo, treat all `dotfiles/**/*.md` files as [literate markdown] where each codeblock can be executed according to its rules.
+Every code block in a folder of Markdown can be compiled, symlinked, or run.
 
-## Literate Codeblock
+## Why?
+
+**literate markdown** IMO dotfiles should be organized in a way that makes sense to you, for fast recall and organization – but you ultimately need to either place them in a specific location or manipulate your `$PATH`.
+
+I really liked the topic-centric approach of [other markdown systems] but found I need WAY more context than code comments since I update them so infrequently.
+
+**CLI** All my old dotfiles systems relied on either a "bag of scripts" folder or someone else's CLI. I loved `kody` for a long time, but updating the actual dotfiles became difficult as my config grew stale.
+
+## How this repo is organized
+
+- `demo/`: A functional demo folder of dotfiles. see demo/README.md
+- `dotfiles/`: My actual, personal, dotfiles. Use for inspiration or whatever
+- `src/`: the CLI script codebase
+
+## Code blocks as metadata
 
 Each codeblock is created with three backticks (`) or tildes (~) and is provided extra data in a **space-delimited** collection:
 

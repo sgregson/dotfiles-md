@@ -2,8 +2,8 @@
   "name": "literate-mdx-dotfiles",
   "version": "1.0.0",
   "description": "",
-  "bin": "./vorpal.mjs",
-  "main": "src/index.mjs",
+  "bin": "./cli.mjs",
+  "main": "src/vorpal.mjs",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
