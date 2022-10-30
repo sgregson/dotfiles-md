@@ -11,7 +11,7 @@ import { toMdAST } from "./api.mjs";
 
 const CLI = Vorpal();
 const UUID = "dev.sgregson.dotfiles-cli";
-const DEFAULT_PATTERN = "src/**/*.md";
+const DEFAULT_PATTERN = "demo/**/*.md";
 const homeDirectory = os.homedir();
 
 CLI.history(UUID);
