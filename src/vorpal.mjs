@@ -246,7 +246,10 @@ async function globAsync(pattern, options) {
   });
 }
 async function updateFiles() {
-  const files = await globAsync(state("filePattern"));
+  const files = (await globAsync(state("filePattern"))).filter(
+    // TODO: make this OS-agnostic
+    (filePath) => !filePath.includes("build/")
+  );
   // const blocks = await getRunnableBlocks(files);
 
   state("files", files);
