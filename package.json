@@ -1,0 +1,25 @@
+{
+  "name": "literate-mdx-dotfiles",
+  "version": "1.0.0",
+  "description": "",
+  "bin": "./vorpal.mjs",
+  "main": "src/index.mjs",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^16.0.3",
+    "escape-string-regexp": "^5.0.0",
+    "glob": "^8.0.3",
+    "inquirer": "^9.1.4",
+    "make-dir": "^3.1.0",
+    "remark-frontmatter": "^4.0.1",
+    "remark-gfm": "^3.0.1",
+    "remark-parse": "^10.0.1",
+    "unified": "^10.1.2",
+    "unist-util-visit": "^4.1.1",
+    "vorpal": "^1.12.0"
+  }
+}
