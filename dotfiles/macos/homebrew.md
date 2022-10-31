@@ -10,20 +10,20 @@ brew tap welldan97/whereami
 
 ```sh action=run title=formulas
 # brew install git
-brew install bk
-brew install imgcat
-brew install joeyhoer/extras/gzthermal
-brew install jq
-brew install jrnl
-brew install kryptco/tap/kr
-brew install mapbox/cli/mapbox
-brew install mr
-brew install rbenv
-brew install spark
-brew install starship
-brew install whereami
-brew install zsh
-brew install zsh-completions
+brew install bk;
+brew install gitleaks; #secret scanning for git repos
+brew install imgcat;
+brew install joeyhoer/extras/gzthermal;
+brew install jq;
+brew install jrnl;
+# brew install kryptco/tap/kr
+brew install mapbox/cli/mapbox;
+brew install mr;
+brew install rbenv;
+brew install spark;
+brew install whereami;
+brew install zsh;
+brew install zsh-completions;
 ```
 
 ```sh action=run title=casks

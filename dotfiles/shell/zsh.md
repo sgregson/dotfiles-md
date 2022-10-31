@@ -104,10 +104,13 @@ The profile file for non-interactive terminal windows.
 Generally, only put the things in here you'd want to have available to scripts (not open terminal windows)
 
 ```zsh $HOME/.zprofile action=symlink title=zprofile
-export PATH="$PATH:$(python -m site --user-site)"
+export PATH="$PATH:$(python3 -m site --user-base)/bin"
 # Enable rbenv for sublime plugins (linting)
 # export PATH="$HOME/.rbenv/bin:$PATH"
 # eval "$(rbenv init -)"
+
+# Set PATH, MANPATH, etc., for Homebrew.
+eval "$(/opt/homebrew/bin/brew shellenv)"
 
 # Enable NVM for sublime plugins
 source $HOME/.custom/nvm.sh 'zprofile'
@@ -183,7 +186,7 @@ source $HOME/.custom/env.sh
 source $HOME/.custom/zmv.sh
 source $HOME/.custom/glob.sh
 
-printf " nvm $(nvm --version) / node $(node --version)\n"
+printf " nvm $(nvm --version) (run 'nvm use stable')"
 ```
 
 ```zsh $HOME/.custom/glob.sh action=build title=zsh-extended-globbing
