@@ -145,8 +145,9 @@ CLI.command("run", "run a dotfiles build")
     if (pSelected && pActions) {
       blockTypes = pActions.split(",");
       blocks = await getRunnableBlocks(pSelected.split(","));
-      blocksToRun = blocks.filter((block) =>
-        blockTypes.includes(block.options.action)
+      blocksToRun = blocks.filter(
+        (block) =>
+          blockTypes.includes(block.options.action) && !block.options?.disabled
       );
 
       return Promise.all(
@@ -157,8 +158,8 @@ CLI.command("run", "run a dotfiles build")
     ({ blockTypes } = await this.prompt({
       name: "blockTypes",
       type: "checkbox",
-      message: "select a block type : ",
-      choices: [{ value: "build", checked: true }, "run", "symlink"],
+      message: "Pre-select block types : ",
+      choices: ["build", "run", "symlink"],
     }));
 
     // CLI.log("block type(s):", blockTypes);
@@ -192,7 +193,10 @@ CLI.command("run", "run a dotfiles build")
                   .map((line) => `${line}`)
                   .join("(...)")}`,
               value: block,
-              checked: blockTypes.includes(block.options.action),
+              disabled: block.options?.disabled && "disabled!",
+              checked:
+                blockTypes.includes(block.options?.action) &&
+                !block.options?.disabled,
             })),
           ];
         })
@@ -327,21 +331,23 @@ async function executeBlock(block, i) {
       await fs.ensureDir(path.dirname(maybeTarget));
 
       // build the source file and symlink it
-      await fs
-        .writeFile(buildFile, content)
-        .then(() =>
-          CLI.log(`🔨 built ${path.relative(process.cwd(), buildFile)}`)
-        );
-      await fs
-        .ensureSymlink(buildFile, maybeTarget)
-        .then(() =>
-          CLI.log(
-            `🔗 linked ${maybeTarget} to ${path.relative(
-              process.cwd(),
-              buildFile
-            )}`
-          )
-        );
+      await fs.writeFile(buildFile, content).then(
+        () => CLI.log(`🔨 built ${path.relative(process.cwd(), buildFile)}`),
+        async (err) => {
+          // backup & move old version
+          await fs.move(buildFile, buildFile + `.bak-${Date.now()}`);
+          await fs.writeFile(buildFile, content);
+        }
+      );
+      await fs.ensureSymlink(buildFile, maybeTarget).then(
+        // prettier-ignore
+        () => CLI.log(`🔗 linked ${maybeTarget} to ${path.relative(process.cwd(),buildFile)}`),
+        async (err) => {
+          // backup & move old version
+          await fs.move(maybeTarget, maybeTarget + `.bak-${Date.now()}`);
+          await fs.ensureSymlink(buildFile, maybeTarget);
+        }
+      );
       break;
     default:
       CLI.log(`...hang on, learning how to ${action}`);

@@ -29,10 +29,12 @@ The `[filePath]` may be used to title the code block, and may be used according 
 
 The `[...options]` array describes a list of `key=value` specifiers which may define how the repo ought to act on this code block.
 
+- `disabled=true` disable this code block from being run (legacy stuff)
 - `action` defines what to do with the content
-  - **`=build` (default):** build the file to `[filePath]`, replacing content as appropriate
-  - `=run`: run this code block according to the file syntax (js: node, sh: bash, zsh)
+  - `=build`: build the file to `[filePath]`, replacing content as appropriate
   - `=symlink`: find-replace patterns (`%...`) in the codeblock and symlink the result (from `/build`) to `[filePath]`
+  - `=include`: build the block into a place included in your shell (`/build/includes/`) TODO: not implemented
+  - `=run`: run this code block according to the file syntax (js: node, sh: bash, zsh) TODO: not implemented yet
 - `when` defines the availability of this codeblock
   - `=npm`: when npm is available (after nvm install)
   - `=os.platform()==='darwin'`: only on macos
