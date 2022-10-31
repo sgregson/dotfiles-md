@@ -29,13 +29,16 @@ const DEFAULT_STATE = {
   lastScan: Date.now(),
   // user-configurable
   filePattern: DEFAULT_PATTERN,
-  name: "WHOAMI",
+  name: "",
 };
 
 const state = (key, value = undefined) => {
   // to remove, explicitly set value to null
   if (value === null) CLI.localStorage.removeItem(key);
-  if (value) CLI.localStorage.setItem(key, JSON.stringify(value));
+  if (value !== null && value !== undefined) {
+    CLI.localStorage.setItem(key, JSON.stringify(value));
+  }
+
   // "fetch all"
   if (!key) {
     return Object.fromEntries(
@@ -57,6 +60,7 @@ CLI.command("config", "configure your dotfiles application")
   .option("--name <string>", "Your name")
   .option("--pattern <glob>", "Glob pattern to match your markdown files")
   .action(function cmdConfig(args, cb) {
+    CLI.log(args.options);
     return CLI.activeCommand
       .prompt([
         {
@@ -129,47 +133,64 @@ CLI.command("config", "configure your dotfiles application")
   });
 
 CLI.command("run", "run a dotfiles build")
+  .option("-p, --pattern <pattern>", "Provide a file pattern")
   .option("-s, --selected <selected>", "Provide selected files")
   .option("-a, --actions <actions>", "Provide codeblock action types")
   .action(async function cmdRun({
     blockType,
-    options: { selected, actions },
+    options: { selected, actions, pattern },
     ...args
   }) {
-    let blockTypes, blocks, blocksToRun;
-
-    // skip all UI prompts and bail
-    let { selected: pSelected, actions: pActions } = CLI.parse(process.argv, {
+    // Uses command options to pre-populate or skip UI
+    let {
+      selected: argSelected,
+      pattern: argPattern,
+      actions: argActions,
+    } = CLI.parse(process.argv, {
       use: "minimist",
     });
-    if (pSelected && pActions) {
-      blockTypes = pActions.split(",");
-      blocks = await getRunnableBlocks(pSelected.split(","));
+
+    if (argPattern) {
+      await updateFiles(argPattern);
+      state("selected", []);
+      CLI.ui.delimiter(statusBar());
+    }
+
+    let blockTypes = [],
+      // arg overrides "selected", falls back to all files
+      files = argSelected
+        ? argSelected.split(",")
+        : state("selected").length !== 0
+        ? state("selected")
+        : state("files"),
+      blocks = await getRunnableBlocks(files),
+      blocksToRun = [];
+
+    if (argActions) blockTypes = argActions.split(",");
+
+    if ((argSelected || argPattern) && argActions) {
+      // use selected files if provided, otherwise "all"
       blocksToRun = blocks.filter(
         (block) =>
           blockTypes.includes(block.options.action) && !block.options?.disabled
       );
-
-      return Promise.all(
-        blocksToRun.map(async (b, i) => await executeBlock(b, i))
-      );
     }
 
-    ({ blockTypes } = await this.prompt({
+    ({ blockTypes = blockTypes } = await this.prompt({
       name: "blockTypes",
       type: "checkbox",
       message: "Pre-select block types : ",
+      when: blockTypes.length === 0,
+      // default: blockTypes,
       choices: ["build", "run", "symlink"],
     }));
 
-    // CLI.log("block type(s):", blockTypes);
-    blocks = await getRunnableBlocks(state("selected"));
-    CLI.log("# blocks:", blocks.length);
-
-    ({ blocksToRun } = await this.prompt({
+    ({ blocksToRun = blocksToRun } = await this.prompt({
       name: "blocksToRun",
       type: "checkbox",
       message: "Related Blocks : ",
+      when: blocksToRun.length === 0,
+      // default: blocksToRun,
       choices: Array.from(
         blocks.reduce((acc, blockData) => {
           const prev = acc.has(blockData.source)
@@ -203,9 +224,7 @@ CLI.command("run", "run a dotfiles build")
         .flat(2),
     }));
 
-    return Promise.all(
-      blocksToRun.map(async (b, i) => await executeBlock(b, i))
-    );
+    return Promise.all(blocksToRun.map(executeBlock));
   });
 
 CLI.command("select", "Select dotfiles").action(async function cmdSelect(
@@ -251,7 +270,9 @@ async function globAsync(pattern, options) {
     });
   });
 }
-async function updateFiles() {
+async function updateFiles(newPattern) {
+  if (newPattern) state("filePattern", newPattern);
+
   const files = (await globAsync(state("filePattern"))).filter(
     // TODO: make this OS-agnostic
     (filePath) => !filePath.includes("build/")
@@ -304,6 +325,7 @@ async function executeBlock(block, i) {
     targetPath,
     source,
     content,
+    lang,
   } = block;
   const buildDir = path.join(process.cwd(), "build");
   let maybeTarget;
@@ -344,13 +366,17 @@ async function executeBlock(block, i) {
         () => CLI.log(`🔗 linked ${maybeTarget} to ${path.relative(process.cwd(),buildFile)}`),
         async (err) => {
           // backup & move old version
-          await fs.move(maybeTarget, maybeTarget + `.bak-${Date.now()}`);
-          await fs.ensureSymlink(buildFile, maybeTarget);
+          await fs
+            .move(maybeTarget, maybeTarget + `.bak-${Date.now()}`)
+            .catch(() => {});
+          await fs.ensureSymlink(buildFile, maybeTarget).catch(() => {});
         }
       );
       break;
     default:
-      CLI.log(`...hang on, learning how to ${action}`);
+      CLI.log(
+        `😬 hang in there, I still have to learn how to ${action} a '${lang}' block.`
+      );
       break;
   }
 }
@@ -362,7 +388,7 @@ function statusBar() {
   const updated = state();
   // CLI.log(JSON.stringify(updated, null, 2));
   return `========= ${[
-    `(${updated.name})`,
+    updated.name ? `(${updated.name})` : "",
     updated.filePattern,
     updated.files.length,
   ].join("\t")} files \t${updated.selected.length} selected\ndotfiles$`;

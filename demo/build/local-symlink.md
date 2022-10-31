@@ -1,1 +1,1 @@
-/Users/sgregson/Documents/Code/Non-Work/literate-mdx-dotfiles/demo/build/links/1-local-symlink.md
+/Users/sgregson/Documents/Code/Non-Work/dot-md/demo/build/links/2-local-symlink.md

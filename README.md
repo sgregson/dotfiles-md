@@ -2,6 +2,21 @@
 
 Every code block in a folder of Markdown can be compiled, symlinked, or run.
 
+## Usage
+
+> Requires NodeJS to be installed
+
+1. navigate to your folder of markdown files
+1. Run `npx dot-md`
+
+## Installation
+
+It's recommended to run the command line tool via `npx` rather than installing a local copy.
+
+> To use offline, `npm i -g dot-md` and run with `npx dot-md --no`. NOTE: this will not auto-update
+
+Read CONTRIBUTING.md for contributing code changes or installing locally.
+
 ## Why?
 
 **literate markdown** IMO dotfiles should be organized in a way that makes sense to you, for fast recall and organization – but you ultimately need to either place them in a specific location or manipulate your `$PATH`.
@@ -20,16 +35,17 @@ I really liked the topic-centric approach of [other markdown systems] but found 
 
 Each codeblock is created with three backticks (`) or tildes (~) and is provided extra data in a **space-delimited** collection:
 
-    ```[syntax] [filePath] [...options]
+    ```<lang> [filePath] [...options]
     ```
 
-The `[syntax]` is specified in the usual markdown manner, and is only used to specify the syntax highlighting of the code snippet.
+The `<lang>` is the usual markdown code block langauge format. It is used to specify the syntax highlighting of the code snippet but may in the future be used to direct the `action=run` directive.
 
-The `[filePath]` may be used to title the code block, and may be used according to the `[options]` specified. It **must not** contain an equals sign `=`.
+A `[filePath]` may be provided in order to direct the output of the code block. It **must not** contain an equals sign `=`.
 
-The `[...options]` array describes a list of `key=value` specifiers which may define how the repo ought to act on this code block.
+The `[...options]` array is a space-delimited list of `key=value` directives defining how the CLI should act on this code block:
 
-- `disabled=true` disable this code block from being run (legacy stuff)
+- `disabled=true` disable this code block from being run (helpful for migrations)
+- `title=<string>` a title for the code block to appear in the CLI. `<string>` **msut not** contain spaces.
 - `action` defines what to do with the content
   - `=build`: build the file to `[filePath]`, replacing content as appropriate
   - `=symlink`: find-replace patterns (`%...`) in the codeblock and symlink the result (from `/build`) to `[filePath]`

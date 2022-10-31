@@ -1,7 +1,7 @@
 {
-  "name": "literate-mdx-dotfiles",
+  "name": "dot-md",
   "version": "1.0.0",
-  "description": "",
+  "description": "Manage your dotfiles with markdown",
   "bin": "./cli.mjs",
   "main": "src/vorpal.mjs",
   "scripts": {

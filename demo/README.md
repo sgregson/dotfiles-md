@@ -15,7 +15,7 @@ The CLI builds `action=symlink` codeblocks to the current working directory (`${
 
 ```sh
 # from literate-dotfiles/demo/
-$ node ../cli.mjs run -- --actions=symlink,build --selected=local.md
+$ node ../cli.mjs run --actions symlink,build --selected local.md
 ```
 
 Which is the equivalent to an interactive CLI:
