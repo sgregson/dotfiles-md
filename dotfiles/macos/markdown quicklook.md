@@ -7,7 +7,7 @@ brew install --cask qlmarkdown
 > TODO: need to implement dark color scheme `prefers-color-scheme: dark`
 
 <!-- prettier-ignore -->
-```css $HOME/mdqlstyle.css action=build title=stylesheet
+```css $HOME/mdqlstyle.css action=symlink title=stylesheet
 html,body{color:black}
 *{margin:0;padding:0}
 body{font:13.34px helvetica,arial,freesans,clean,sans-serif;-webkit-font-smoothing:antialiased;line-height:1.4;padding:30px;background:#fff;border-radius:3px;-moz-border-radius:3px;-webkit-border-radius:3px;max-width:900px;margin:15px auto;border:3px solid #eee!important}

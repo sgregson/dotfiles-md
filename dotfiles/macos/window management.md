@@ -1,6 +1,6 @@
 # Phoenix JS
 
-```js $HOME/phoenix.js action=build title=phoenix-install
+```js $HOME/phoenix.js action=symlink title=phoenix-install
 "use strict";
 /*globals Phoenix Window App Key Screen Space*/
 Phoenix.notify("initializing");
@@ -424,7 +424,7 @@ The most important utility is to automatically arrange windows when I connect kn
 
 Significant overlap with phoenix.js
 
-```js $HOME/.slate.js action=build title=slate-installer
+```js $HOME/.slate.js action=symlink title=slate-installer
 /**
  * Slate Configuration File
  *

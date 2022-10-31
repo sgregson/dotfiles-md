@@ -1,5 +1,5 @@
 Vim editor settings
 
-```vim $HOME/.vimrc action=build
+```vim $HOME/.vimrc action=symlink
 :syntax enable
 ```

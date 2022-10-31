@@ -1,6 +1,6 @@
 `gs` and `gdc` are in daily use
 
-```sh $HOME/.custom/git.sh action=build title=git-shell-aliases
+```sh $HOME/.custom/git.sh action=symlink title=git-shell-aliases
 alias g="git"
 alias gf="git fetch"
 # alias go="git checkout"

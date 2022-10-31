@@ -6,7 +6,7 @@
 
 ## SCSS
 
-```yaml $HOME/.stylelintrc action=build title=global-stylelint
+```yaml $HOME/.stylelintrc action=symlink title=global-stylelint
 # SCSS Linting rules, uses stylelint
 #
 # Rules are sorted alphabetcally,

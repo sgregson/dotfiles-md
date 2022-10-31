@@ -1,4 +1,4 @@
-```zsh $HOME/.custom/reloadTabs action=build disabled=true title=reloadTabs-function
+```zsh $HOME/.custom/reloadTabs action=symlink disabled=true title=reloadTabs-function
 # Reload Chrome tabs in background for matching $1 string
 # https://gist.github.com/badsyntax/1f4a58715194d780b2f6
 # Usage: reloadTabs "wayfair.com" will do browsersync for all wayfair tabs (based on turbine events)

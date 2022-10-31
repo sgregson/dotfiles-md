@@ -2,7 +2,7 @@
 
 Load NVM automatically based on directory
 
-```zsh $HOME/.custom/nvm.sh action=build title=nvm-loader
+```zsh $HOME/.custom/nvm.sh action=symlink title=nvm-loader
 # source $HOME/.custom/nvm.sh 'callsite'
 if [ -d ~/.nvm/ ]; then
 # load NVM
@@ -87,14 +87,14 @@ add-zsh-hook chpwd auto-switch-node-version
 auto-switch-node-version
 ```
 
-```zsh $HOME/.custom/glob.sh action=build title=zsh-extended-globbing
+```zsh $HOME/.custom/glob.sh action=symlink title=zsh-extended-globbing
 #! /bin/zsh
 # Permit ZSH extended globbing
 # only include in interactive shells (zshrc) - https://unix.stackexchange.com/questions/431805/zsh-is-there-a-problem-with-always-enabling-extended-glob
 setopt extended_glob
 ```
 
-```zsh $HOME/.custom/zmv.sh action=build title=zmv-for-build-rename
+```zsh $HOME/.custom/zmv.sh action=symlink title=zmv-for-build-rename
 # Dry Run:$ zmv -n 'Page(*)/shot.jpg' 'shot-${1}.jpg'
 # Actual: $ zmv 'Page(*)/shot.jpg' 'shot-${1}.jpg'
 autoload zmv
@@ -103,7 +103,7 @@ alias zcp='zmv -C'
 alias zln='zmv -L'
 ```
 
-```zsh $HOME/.custom/env.sh action=build title=environment-variables
+```zsh $HOME/.custom/env.sh action=symlink title=environment-variables
 # Manage environment variables with 1Password CLI (was installed via homebrew)
 # op signin [VaultName]
 echo "...fetch env"

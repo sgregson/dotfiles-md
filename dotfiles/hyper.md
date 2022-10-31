@@ -1,4 +1,4 @@
-```js $HOME/hyper.js action=build
+```js $HOME/hyper.js action=symlink
 module.exports = {
   config: {
     // default font size in pixels for all tabs

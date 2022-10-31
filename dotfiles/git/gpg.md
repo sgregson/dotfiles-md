@@ -10,6 +10,6 @@ gpg --list-secret-keys --keyid-format=long
 git config --global user.signingkey #############
 ```
 
-```ini $HOME/.gnupg/gpg-agent.conf action=build title=gpg-pinentry
+```ini $HOME/.gnupg/gpg-agent.conf action=symlink title=gpg-pinentry
 pinentry-program $(which pinentry-mac)
 ```
