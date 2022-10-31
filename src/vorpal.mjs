@@ -1,9 +1,9 @@
-import { promises as fsPromises } from "fs";
-import path from "path";
+//--- core libs
 import os from "os";
+import path from "path";
 //--- filesystem utils
+import fs from "fs-extra";
 import glob from "glob";
-import makeDir from "make-dir";
 //--- cli utils
 import Vorpal from "vorpal";
 import inquirer from "inquirer";
@@ -264,7 +264,7 @@ async function updateSelected(files) {
 async function getRunnableBlocks(inputFiles) {
   let files = [];
   for (const filePath of inputFiles) {
-    const fileContent = await fsPromises.readFile(filePath);
+    const fileContent = await fs.readFile(filePath);
     const theDoc = await toMdAST.parse(fileContent);
 
     files = files.concat(
@@ -299,43 +299,39 @@ async function executeBlock(block, i) {
     source,
     content,
   } = block;
-  const maybeTarget = path.resolve(path.dirname(source), targetPath);
+  const buildDir = path.join(process.cwd(), "build");
+  let maybeTarget;
+
+  if (action === "build" || action === "symlink") {
+    maybeTarget = path.resolve(path.dirname(source), targetPath);
+  }
+
   switch (action) {
     case "build":
-      // make sure the folder is available
-      await makeDir(path.dirname(maybeTarget)).catch((err) => {
-        CLI.log(err);
-      });
-      if (!maybeTarget) {
-        CLI.log(`couldn't find destination path ${maybeTarget}`);
-        break;
-      }
-      // actually write the file
-      await fsPromises.writeFile(maybeTarget, content).then(() => {
+      // make sure the folder is available before writing
+      await fs.ensureFile(maybeTarget);
+      await fs.writeFile(maybeTarget, content).then(() => {
         CLI.log(`🔨 built ${path.relative(process.cwd(), maybeTarget)}`);
       });
       break;
     case "symlink":
-      // make sure the build and target directory exists
-      const buildDir = path.join(process.cwd(), "build", "links");
       const buildFile = path.join(
         buildDir,
-        `${i}-${path.parse(maybeTarget).base}` // iteration to dedupe multiple symlinks in one file
+        "links",
+        // named for the originating file, with $i to dedupe multiple symlinks
+        `${i}-${path.parse(maybeTarget).base}`
       );
-      await makeDir(buildDir).catch((err) => CLI.log(err));
-      await makeDir(path.dirname(maybeTarget));
+      await fs.ensureDir(path.dirname(buildFile));
+      await fs.ensureDir(path.dirname(maybeTarget));
 
-      // build the file to that directory
-      await fsPromises
+      // build the source file and symlink it
+      await fs
         .writeFile(buildFile, content)
         .then(() =>
           CLI.log(`🔨 built ${path.relative(process.cwd(), buildFile)}`)
         );
-      // remove any existing file
-      // before creating a symlink at the target pointed at the build file
-      await fsPromises.unlink(maybeTarget).catch(() => {});
-      await fsPromises
-        .symlink(buildFile, maybeTarget)
+      await fs
+        .ensureSymlink(buildFile, maybeTarget)
         .then(() =>
           CLI.log(
             `🔗 linked ${maybeTarget} to ${path.relative(
