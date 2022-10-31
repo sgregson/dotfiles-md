@@ -2,7 +2,7 @@
 
 Load NVM
 
-```sh $HOME/.custom/nvm.sh action=build title=nvm-loader
+```zsh $HOME/.custom/nvm.sh action=build title=nvm-loader
 # source $HOME/.custom/nvm.sh 'callsite'
 if [ -d ~/.nvm/ ]; then
 # load NVM
@@ -18,6 +18,73 @@ else
   fi
 fi
 
+auto-switch-node-version() {
+  NVMRC_PATH=$(nvm_find_nvmrc)
+  CURRENT_NODE_VERSION=$(nvm version)
+
+  if [[ ! -z "$NVMRC_PATH" ]]; then
+    # .nvmrc file found!
+
+    # Read the file
+    REQUESTED_NODE_VERSION=$(cat $NVMRC_PATH)
+
+    # Find an installed Node version that satisfies the .nvmrc
+    MATCHED_NODE_VERSION=$(nvm_match_version $REQUESTED_NODE_VERSION)
+
+    if [[ ! -z "$MATCHED_NODE_VERSION" && $MATCHED_NODE_VERSION != "N/A" ]]; then
+      # A suitable version is already installed.
+
+      # Clear any warning suppression
+      unset AUTOSWITCH_NODE_SUPPRESS_WARNING
+
+      # Switch to the matched version ONLY if necessary
+      if [[ $CURRENT_NODE_VERSION != $MATCHED_NODE_VERSION ]]; then
+        nvm use $REQUESTED_NODE_VERSION
+      fi
+    else
+      # No installed Node version satisfies the .nvmrc.
+
+      # Quit silently if we already just warned about this exact .nvmrc file, so you
+      # only get spammed once while navigating around within a single project.
+      if [[ $AUTOSWITCH_NODE_SUPPRESS_WARNING == $NVMRC_PATH ]]; then
+        return
+      fi
+
+      # Convert the .nvmrc path to a relative one (if possible) for readability
+      RELATIVE_NVMRC_PATH="$(realpath --relative-to=$(pwd) $NVMRC_PATH 2> /dev/null || echo $NVMRC_PATH)"
+
+      # Print a clear warning message
+      echo ""
+      echo "WARNING"
+      echo "  Found file: $RELATIVE_NVMRC_PATH"
+      echo "  specifying: $REQUESTED_NODE_VERSION"
+      echo "  ...but no installed Node version satisfies this."
+      echo "  "
+      echo "  Current node version: $CURRENT_NODE_VERSION"
+      echo "  "
+      echo "  You might want to run \"nvm install\""
+
+      # Record that we already warned about this unsatisfiable .nvmrc file
+      export AUTOSWITCH_NODE_SUPPRESS_WARNING=$NVMRC_PATH
+    fi
+  else
+    # No .nvmrc file found.
+
+    # Clear any warning suppression
+    unset AUTOSWITCH_NODE_SUPPRESS_WARNING
+
+    # Revert to default version, unless that's already the current version.
+    # NOTE: ONLY UNCOMMENT FOR SLOW TERMINAL STARTUP
+    # if [[ $CURRENT_NODE_VERSION != $(nvm version default)  ]]; then
+    #   nvm use default
+    # fi
+  fi
+}
+
+# Run the above function in ZSH whenever you change directory
+autoload -U add-zsh-hook
+add-zsh-hook chpwd auto-switch-node-version
+auto-switch-node-version
 ```
 
 # ZSH
@@ -107,9 +174,47 @@ HIST_STAMPS="yyyy-mm-dd"
 # Custom plugins may be added to $ZSH_CUSTOM/plugins/
 plugins=(git)
 
+# Load it!
 source $ZSH/oh-my-zsh.sh
+
 # User Config (references to other dotfiles)
 source $HOME/.custom/git.sh
+source $HOME/.custom/env.sh
+source $HOME/.custom/zmv.sh
+source $HOME/.custom/glob.sh
+
+printf " nvm $(nvm --version) / node $(node --version)\n"
+```
+
+```zsh $HOME/.custom/glob.sh action=build title=zsh-extended-globbing
+#! /bin/zsh
+# Permit ZSH extended globbing
+# only include in interactive shells (zshrc) - https://unix.stackexchange.com/questions/431805/zsh-is-there-a-problem-with-always-enabling-extended-glob
+setopt extended_glob
+```
+
+```zsh $HOME/.custom/zmv.sh action=build title=zmv-for-build-rename
+# Dry Run:$ zmv -n 'Page(*)/shot.jpg' 'shot-${1}.jpg'
+# Actual: $ zmv 'Page(*)/shot.jpg' 'shot-${1}.jpg'
+autoload zmv
+alias mmv='noglob zmv -W'
+alias zcp='zmv -C'
+alias zln='zmv -L'
+```
+
+```zsh $HOME/.custom/env.sh action=build title=environment-variables
+# Manage environment variables with 1Password CLI (was installed via homebrew)
+# op signin [VaultName]
+echo "...fetch env"
+
+# https://rossedman.io/blog/computers/setting-env-vars-from-1password/
+export MAPBOX_ACCESS_TOKEN=$(op read op://Personal/MAPBOX_ACCESS_TOKEN/password)
+export DAISYDISK_LICENSE=$(op read op://Personal/DAISYDISK_LICENSE/password)
+
+# apply the sublimerge licence
+if [ -d "$HOME/Library/Application Support/Sublime Text 3/" ]; then
+  echo "{\"key\": \"$(op read op://Personal/SUBLIMERGE_LICENSE/password)\"" > "$HOME/Library/Application Support/Sublime Text 3/Packages/User/Sublimerge.sublime-license"
+fi
 ```
 
 ```zsh $HOME/.zshrc action=symlink title=zshrc-OLD disabled=true

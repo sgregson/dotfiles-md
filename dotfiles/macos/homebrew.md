@@ -27,7 +27,7 @@ brew install zsh-completions
 ```
 
 ```sh action=run title=casks
-brew install --cask 1password
+brew install --cask 1password/tap/1password-cli
 brew install --cask alfred
 brew install --cask bitbar
 brew install --cask cloudapp
