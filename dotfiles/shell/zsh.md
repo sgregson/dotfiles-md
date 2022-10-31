@@ -1,6 +1,6 @@
 # Utilities
 
-Load NVM
+Load NVM automatically based on directory
 
 ```zsh $HOME/.custom/nvm.sh action=build title=nvm-loader
 # source $HOME/.custom/nvm.sh 'callsite'
@@ -87,6 +87,37 @@ add-zsh-hook chpwd auto-switch-node-version
 auto-switch-node-version
 ```
 
+```zsh $HOME/.custom/glob.sh action=build title=zsh-extended-globbing
+#! /bin/zsh
+# Permit ZSH extended globbing
+# only include in interactive shells (zshrc) - https://unix.stackexchange.com/questions/431805/zsh-is-there-a-problem-with-always-enabling-extended-glob
+setopt extended_glob
+```
+
+```zsh $HOME/.custom/zmv.sh action=build title=zmv-for-build-rename
+# Dry Run:$ zmv -n 'Page(*)/shot.jpg' 'shot-${1}.jpg'
+# Actual: $ zmv 'Page(*)/shot.jpg' 'shot-${1}.jpg'
+autoload zmv
+alias mmv='noglob zmv -W'
+alias zcp='zmv -C'
+alias zln='zmv -L'
+```
+
+```zsh $HOME/.custom/env.sh action=build title=environment-variables
+# Manage environment variables with 1Password CLI (was installed via homebrew)
+# op signin [VaultName]
+echo "...fetch env"
+
+# https://rossedman.io/blog/computers/setting-env-vars-from-1password/
+export MAPBOX_ACCESS_TOKEN=$(op read op://Personal/MAPBOX_ACCESS_TOKEN/password)
+export DAISYDISK_LICENSE=$(op read op://Personal/DAISYDISK_LICENSE/password)
+
+# apply the sublimerge licence
+if [ -d "$HOME/Library/Application Support/Sublime Text 3/" ]; then
+  echo "{\"key\": \"$(op read op://Personal/SUBLIMERGE_LICENSE/password)\"" > "$HOME/Library/Application Support/Sublime Text 3/Packages/User/Sublimerge.sublime-license"
+fi
+```
+
 # ZSH
 
 ## Shared Environment (.zshenv)
@@ -149,7 +180,7 @@ HYPHEN_INSENSITIVE="true"
 # DISABLE_MAGIC_FUNCTIONS="true"
 
 # Uncomment the following line to disable colors in ls.
-DISABLE_LS_COLORS="true"
+# DISABLE_LS_COLORS="true"
 
 # Uncomment the following line to disable auto-setting terminal title.
 # DISABLE_AUTO_TITLE="true"
@@ -186,39 +217,12 @@ source $HOME/.custom/env.sh
 source $HOME/.custom/zmv.sh
 source $HOME/.custom/glob.sh
 
+export GPG_TTY=$(tty)
+
 printf " nvm $(nvm --version) (run 'nvm use stable')"
 ```
 
-```zsh $HOME/.custom/glob.sh action=build title=zsh-extended-globbing
-#! /bin/zsh
-# Permit ZSH extended globbing
-# only include in interactive shells (zshrc) - https://unix.stackexchange.com/questions/431805/zsh-is-there-a-problem-with-always-enabling-extended-glob
-setopt extended_glob
-```
-
-```zsh $HOME/.custom/zmv.sh action=build title=zmv-for-build-rename
-# Dry Run:$ zmv -n 'Page(*)/shot.jpg' 'shot-${1}.jpg'
-# Actual: $ zmv 'Page(*)/shot.jpg' 'shot-${1}.jpg'
-autoload zmv
-alias mmv='noglob zmv -W'
-alias zcp='zmv -C'
-alias zln='zmv -L'
-```
-
-```zsh $HOME/.custom/env.sh action=build title=environment-variables
-# Manage environment variables with 1Password CLI (was installed via homebrew)
-# op signin [VaultName]
-echo "...fetch env"
-
-# https://rossedman.io/blog/computers/setting-env-vars-from-1password/
-export MAPBOX_ACCESS_TOKEN=$(op read op://Personal/MAPBOX_ACCESS_TOKEN/password)
-export DAISYDISK_LICENSE=$(op read op://Personal/DAISYDISK_LICENSE/password)
-
-# apply the sublimerge licence
-if [ -d "$HOME/Library/Application Support/Sublime Text 3/" ]; then
-  echo "{\"key\": \"$(op read op://Personal/SUBLIMERGE_LICENSE/password)\"" > "$HOME/Library/Application Support/Sublime Text 3/Packages/User/Sublimerge.sublime-license"
-fi
-```
+## Login Shell (DEPRECATED)
 
 ```zsh $HOME/.zshrc action=symlink title=zshrc-OLD disabled=true
 # Path to your oh-my-zsh installation.
