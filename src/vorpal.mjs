@@ -278,7 +278,7 @@ async function getRunnableBlocks(inputFiles) {
             meta,
             targetPath: options
               .find((opt) => !opt.includes("="))
-              ?.replace(/^~(?=$|\/|\\)/, homeDirectory),
+              ?.replace(/^(~|\$HOME)(?=$|\/|\\)/, homeDirectory),
             options: Object.fromEntries(
               options
                 .filter((opt) => opt.includes("="))
