@@ -1,6 +1,6 @@
 # Global gitconfig
 
-```ini $HOME/.config/git/config action=symlink title=gitconfig(global)
+```ini $HOME/.gitconfig action=symlink title=gitconfig(global)
 [init]
   templatedir = ~/.git-templates
 [user]
@@ -113,7 +113,7 @@
   diff-exclude    =  ! git diff --name-only origin/master | grep -v -E "$1" | xargs git diff origin/master --full-index
   # IDENTITY
   whoami          = ! git config --get user.name && git config --get user.email
-  %GIT_ALIASES
+  # %GIT_ALIASES
   # Workflow
   mark-done       = "! f() { git branch -m \"$1\" \"=$1\"; }; f"
   mark-ready      = "! f() { git branch -m \"$1\" \"+$1\"; }; f"
@@ -127,7 +127,7 @@
 
 # Global gitignore
 
-```sh $HOME/.config/git/ignore action=build title=gitignore(global)
+```sh $HOME/.gitignore action=symlink title=gitignore(global)
 *.sublime-workspace
 *.sublime-projects
 .tags*
