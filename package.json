@@ -7,6 +7,7 @@
   "scripts": {
     "prejfdi": "yarn",
     "jfdi": "cd dotfiles; node ../cli.mjs run -- --pattern \"**/*.md\" --actions symlink,build; cd -",
+    "doit": "cd dotfiles; node ../cli.mjs run -- --pattern \"**/*.md\" --actions symlink,build; cd -",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
