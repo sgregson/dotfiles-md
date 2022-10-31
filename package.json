@@ -5,7 +5,8 @@
   "bin": "./cli.mjs",
   "main": "src/vorpal.mjs",
   "scripts": {
-    "start": "cd dotfiles; node ../cli.mjs run -- --pattern \"**/*.md\" --actions symlink,build; cd -",
+    "prejfdi": "yarn",
+    "jfdi": "cd dotfiles; node ../cli.mjs run -- --pattern \"**/*.md\" --actions symlink,build; cd -",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
