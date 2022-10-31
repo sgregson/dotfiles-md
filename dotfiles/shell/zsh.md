@@ -219,7 +219,7 @@ source $HOME/.custom/glob.sh
 
 export GPG_TTY=$(tty)
 
-printf " nvm $(nvm --version) (run 'nvm use stable')"
+echo "nvm $(nvm --version) (run 'nvm use stable')"
 ```
 
 ## Login Shell (DEPRECATED)
