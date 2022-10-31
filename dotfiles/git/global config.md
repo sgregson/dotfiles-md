@@ -4,12 +4,12 @@
 [init]
   templatedir = ~/.git-templates
 [user]
-  name = %GIT_NAME
-  email = %GIT_EMAIL
-[gpg]
-  program = /usr/local/bin/krgpg
+  name = Spencer Gregson
+  email = sgregson@users.noreply.github.com
+	signingkey = FB5A1923EFF83E21
 [commit]
   gpgSign = true
+	template = /Users/sgregson/.gitmessage
 [core]
   editor = code --wait
   autocrlf = false
