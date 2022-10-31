@@ -185,10 +185,12 @@ CLI.command("run", "run a dotfiles build")
               `${filePath} (${runnableBlocks.length} of ${fileBlocks.length})`
             ),
             runnableBlocks.map((block) => ({
-              name: `${block.meta}\n   ${block.content
-                .split("\n")
-                .map((line) => `${line}`)
-                .join("(...)")}`,
+              name:
+                block.options.title ??
+                `${block.meta}\n   ${block.content
+                  .split("\n")
+                  .map((line) => `${line}`)
+                  .join("(...)")}`,
               value: block,
               checked: blockTypes.includes(block.options.action),
             })),
