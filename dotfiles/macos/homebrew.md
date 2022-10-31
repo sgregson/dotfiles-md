@@ -8,6 +8,10 @@ brew tap mapbox/cli
 brew tap welldan97/whereami
 ```
 
+```sh action=run title=install-all-nerd-fonts
+brew install $( brew search font | grep nerd | tr '\n' ' ' )
+```
+
 ```sh action=run title=formulas
 # brew install git
 brew install bk;
