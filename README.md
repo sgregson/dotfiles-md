@@ -1,19 +1,20 @@
 # Literate Dotfiles
 
-Every code block in a folder of Markdown can be compiled, symlinked, or run.
+Store your new mac in a folder of Markdown can be compiled, symlinked, or run.
 
 ## Usage
 
-> Requires NodeJS to be installed
+**Requires: NodeJS**
 
-1. navigate to your folder of markdown files
-1. Run `npx dot-md`
+> NOTE: Installation & usage is likely to change in the future
 
-## Installation
+1. Install with `npm install -g dotfiles-md` (installs as a global binary)
+1. Navigate to your folder of markdown files
+1. Run with `dotfiles-md`
+
+## Contributing
 
 It's recommended to run the command line tool via `npx` rather than installing a local copy.
-
-> To use offline, `npm i -g dot-md` and run with `npx dot-md --no`. NOTE: this will not auto-update
 
 Read CONTRIBUTING.md for contributing code changes or installing locally.
 
