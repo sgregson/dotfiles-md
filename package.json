@@ -3,7 +3,6 @@
   "version": "0.0.1",
   "license": "GPLv3",
   "author": "Spencer Gregson",
-  "dry-run": true,
   "description": "Manage your dotfiles with markdown",
   "bin": "./cli.mjs",
   "main": "src/vorpal.mjs",
