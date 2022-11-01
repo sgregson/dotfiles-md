@@ -1,13 +1,18 @@
 {
-  "name": "dot-md",
-  "version": "0.0.1",
-  "license": "GPLv3",
+  "name": "@sgregson/dot-md",
+  "version": "0.1.0",
+  "license": "GPL-3.0-or-later",
   "author": "Spencer Gregson",
   "description": "Manage your dotfiles with markdown",
-  "bin": "./cli.mjs",
+  "bin": {
+    "dot-md": "./cli.mjs"
+  },
   "main": "src/vorpal.mjs",
-  "repository": "github:sgregson/dot-md",
   "homepage": "https://github.com/sgregson/dot-md#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sgregson/dot-md"
+  },
   "keywords": [
     "dotfiles",
     "markdown",
@@ -23,7 +28,7 @@
     "prejfdi": "yarn",
     "jfdi": "cd dotfiles; node ../cli.mjs run -- --pattern \"**/*.md\" --actions symlink,build; cd -",
     "doit": "cd dotfiles; node ../cli.mjs run -- --pattern \"**/*.md\" --actions symlink,build; cd -",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"STATUS: no test specified\""
   },
   "dependencies": {
     "dotenv": "^16.0.3",
