@@ -23,10 +23,19 @@
     "darwin"
   ],
   "scripts": {
+    "release": "np",
     "prejfdi": "yarn",
     "jfdi": "cd dotfiles; node ../cli.mjs run -- --pattern \"**/*.md\" --actions symlink,build; cd -",
     "doit": "cd dotfiles; node ../cli.mjs run -- --pattern \"**/*.md\" --actions symlink,build; cd -",
     "test": "echo \"STATUS: no test specified\""
+  },
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org"
+  },
+  "np": {
+    "branch": "main",
+    "releaseDraft": true,
+    "message": "Release %s"
   },
   "dependencies": {
     "@moleculer/vorpal": "^1.11.5",
@@ -40,5 +49,8 @@
     "remark-parse": "^10.0.1",
     "unified": "^10.1.2",
     "unist-util-visit": "^4.1.1"
+  },
+  "devDependencies": {
+    "np": "^7.6.2"
   }
 }
