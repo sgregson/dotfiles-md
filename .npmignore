@@ -1,4 +1,10 @@
-node_modules/
-dotfiles/
+# environment config
 .env
 .github/
+
+# deps
+node_modules/
+
+# personal dotfiles
+dotfiles/
+demo/build/
