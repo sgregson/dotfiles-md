@@ -5,7 +5,7 @@ import path from "path";
 import fs from "fs-extra";
 import glob from "glob";
 //--- cli utils
-import Vorpal from "vorpal";
+import Vorpal from "@moleculer/vorpal";
 import inquirer from "inquirer";
 import { toMdAST } from "./api.mjs";
 
@@ -42,7 +42,7 @@ const state = (key, value = undefined) => {
   // "fetch all"
   if (!key) {
     return Object.fromEntries(
-      CLI.localStorage._localStorage.keys.map((k) => [
+      CLI.localStorage._localStorage._keys.map((k) => [
         k,
         JSON.parse(CLI.localStorage.getItem(k)),
       ])
@@ -102,7 +102,7 @@ CLI.command("config", "configure your dotfiles application")
         switch (mode) {
           case "reset":
             if (confirmReset) {
-              CLI.localStorage._localStorage.keys.forEach((k) => {
+              CLI.localStorage._localStorage._keys.forEach((k) => {
                 state(k, null);
               });
               Object.entries(DEFAULT_STATE).forEach(([k, v]) => {
