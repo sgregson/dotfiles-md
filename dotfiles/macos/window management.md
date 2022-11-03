@@ -1,6 +1,6 @@
 # Phoenix JS
 
-```js $HOME/phoenix.js action=symlink title=phoenix-install
+```js $HOME/.phoenix.js action=symlink title=phoenix-install
 "use strict";
 /*globals Phoenix Window App Key Screen Space*/
 Phoenix.notify("initializing");
@@ -291,31 +291,33 @@ function triggerLayout() {
 
   const SPACE_UNIT = 35;
 
-  // otherwise use spaces
+  // If there's only one screen, you'll want to use spaces
   const useScreens = Screen.all().length > 1;
-  const screens = Screen.all();
-  const regions = screens.map((s) => getRegions(s));
   const spaces = Space.all();
+
+  const screens = Screen.all();
+  // use regions[i] to access specific screens
+  const regions = screens.map((s) => getRegions(s));
 
   const layout = {
     [BROWSER]: (window, i, all) =>
       useScreens
         ? window.setFrame({
-            ...regions[0]["full-y"],
-            ...regions[0]["right-3"],
-            x: regions[0]["right-3"].x - i * SPACE_UNIT,
-            y: regions[0]["full-y"].y + (all.length - i - 1) * SPACE_UNIT,
+            ...regions[1]["full-y"],
+            ...regions[1]["right-3"],
+            x: regions[1]["right-3"].x - i * SPACE_UNIT,
+            y: regions[1]["full-y"].y + (all.length - i - 1) * SPACE_UNIT,
             height:
-              regions[0]["full-y"].height - (all.length - i - 1) * SPACE_UNIT,
+              regions[1]["full-y"].height - (all.length - i - 1) * SPACE_UNIT,
           })
         : moveToSpace(0, { window }),
     [EDITOR]: (window, i) =>
       useScreens
         ? window.setFrame({
-            ...regions[0]["full-y"],
-            ...regions[0]["left-2/3"],
+            ...regions[1]["full-y"],
+            ...regions[1]["left-2/3"],
             width:
-              regions[0]["left-2/3"].width -
+              regions[1]["left-2/3"].width -
               (App.get(BROWSER)
                 .windows()
                 .filter((w) => w.isVisible()).length +
@@ -325,16 +327,16 @@ function triggerLayout() {
                 // two windows should be an even 2:1 split
                 2) *
                 SPACE_UNIT,
-            x: regions[0]["left-2/3"].x + i * SPACE_UNIT,
+            x: regions[1]["left-2/3"].x + i * SPACE_UNIT,
           })
         : moveToSpace(0, { window }),
     [CHAT]: (window, i) => {
       moveToSpace(useScreens ? 0 : 1, { window });
-      window.setFrame(regions[1]["left-2/3"]);
+      window.setFrame(regions[0]["left-2/3"]);
     },
     [NOTES]: (window, i) => {
       moveToSpace(useScreens ? 0 : 1, { window });
-      window.setFrame(regions[1]["right-2/3"]);
+      window.setFrame(regions[0]["right-2/3"]);
     },
   };
 
@@ -707,8 +709,7 @@ grids["grids"][monPcWork] = { width: 2, height: 3 };
 // Slate functions keymaps
 binder["r:" + hyperBig] = slate.operation("relaunch");
 binder["c:" + hyper] = slate.operation("grid", grids);
-binder["padEnter:" + hyper] = slate.operation("hint", hints);
-binder["return:" + hyper] = slate.operation("hint", hints);
+binder["g:" + hyper] = slate.operation("hint", hints);
 
 // Layout keymaps
 binder["pad0:" + hyper] = fullScreen(null);
