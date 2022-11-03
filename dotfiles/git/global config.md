@@ -6,7 +6,9 @@
 [user]
   name = Spencer Gregson
   email = sgregson@users.noreply.github.com
-  signingkey = FB5A1923EFF83E21
+  signingkey = 376AA48582F8ADAFA44B47A1FB5A1923EFF83E21
+[gpg]
+  program = gpg
 [commit]
   gpgSign = true
 	template = /Users/sgregson/.gitmessage
