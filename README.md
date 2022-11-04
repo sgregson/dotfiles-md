@@ -1,61 +1,118 @@
-# Literate Dotfiles
+<div style="width:100%;height:3em;font-size:3.6rem;font-weight:bold;background:linear-gradient(-0.075turn,#3f87a6,#ebf8e1,#f69d3c);color:white;text-shadow:1px 1px 3px black;display:grid;place-items:center;"><div><code>*/.md</code> → <code>~/.*</code></div></div>
 
-Store your new mac in a folder of Markdown can be compiled, symlinked, or run.
+<!-- Add badges from eg: [shields.io](https://shields.io/) -->
+
+[![GPLv3 License](https://img.shields.io/badge/License-GPL%20v3-yellow.svg)](https://opensource.org/licenses/)
+
+# dotfiles-md
+
+Maintain your system configuration as a collection of installable markdown blocks
 
 ## Usage
 
-**Requires: NodeJS**
+Simply navigate to your folder of markdown and then run the interactive CLI:
 
-> NOTE: Installation & usage is likely to change in the future
+```
+$ npx dotfiles-md
+```
 
-1. Install with `npm install -g dotfiles-md` (installs as a global binary)
-1. Navigate to your folder of markdown files
-1. Run with `dotfiles-md`
+> _**Requires:** node.js_. See [contributing] for instructions on installing a local copy
 
-## Contributing
+[contributing]: #contributing
 
-It's recommended to run the command line tool via `npx` rather than installing a local copy.
+### CLI Commands
 
-Read CONTRIBUTING.md for contributing code changes or installing locally.
+_run the `help` command to view help pages_
 
-## Why?
+`config` set the parameters for your CLI
 
-**literate markdown** IMO dotfiles should be organized in a way that makes sense to you, for fast recall and organization – but you ultimately need to either place them in a specific location or manipulate your `$PATH`.
+- **settings** – interactive prompt to define:
+  - `name=<string>` personalize your CLI if you like
+  - `pattern=<glob>` to define the matching parameters
+- **refresh** – refresh the file list
+- **reset** - reset the CLI settings
 
-I really liked the topic-centric approach of [other markdown systems] but found I need WAY more context than code comments since I update them so infrequently.
+`select` select files to use as dotfles sources
 
-**CLI** All my old dotfiles systems relied on either a "bag of scripts" folder or someone else's CLI. I loved `kody` for a long time, but updating the actual dotfiles became difficult as my config grew stale.
+`run` select the code blocks to build into dotfiles (from the selected files)
 
-## How this repo is organized
+## Features
 
-- `demo/`: A functional demo folder of dotfiles. see demo/README.md
-- `dotfiles/`: My actual, personal, dotfiles. Use for inspiration or whatever
-- `src/`: the CLI script codebase
+**Code block metadata**
 
-## Code blocks as metadata
-
-Each codeblock is created with three backticks (`) or tildes (~) and is provided extra data in a **space-delimited** collection:
+Each codeblock is created with three backticks (`) or tildes (~) and assigned a **space-delimited** collection of metadata:
 
     ```<lang> [filePath] [...options]
     ```
 
-The `<lang>` is the usual markdown code block langauge format. It is used to specify the syntax highlighting of the code snippet but may in the future be used to direct the `action=run` directive.
+This should generally be compatible with other documentation systems.
 
-A `[filePath]` may be provided in order to direct the output of the code block. It **must not** contain an equals sign `=`.
+The **`<lang>` directive** is the usual markdown code block langauge format. It is used to specify the syntax highlighting of the code snippet but may in the future be used to direct the `action=run` directive.
 
-The `[...options]` array is a space-delimited list of `key=value` directives defining how the CLI should act on this code block:
+A **`[filePath]` option** may be provided in order to direct the output of the code block. It **must not** contain an equals sign `=`.
+
+The **`[...options]` array** is a space-delimited list of `key=value` directives defining how the CLI should act on this code block (see next).
+
+**Codeblock Options (and actions)**
 
 - `disabled=true` disable this code block from being run (helpful for migrations)
 - `title=<string>` a title for the code block to appear in the CLI. `<string>` **msut not** contain spaces.
 - `action` defines what to do with the content
   - `=build`: build the file to `[filePath]`, replacing content as appropriate
   - `=symlink`: find-replace patterns (`%...`) in the codeblock and symlink the result (from `/build`) to `[filePath]`
-  - `=include`: build the block into a place included in your shell (`/build/includes/`) TODO: not implemented
   - `=run`: run this code block according to the file syntax (js: node, sh: bash, zsh) TODO: not implemented yet
-- `when` defines the availability of this codeblock
+
+<!-- - `when` defines the availability of this codeblock
   - `=npm`: when npm is available (after nvm install)
-  - `=os.platform()==='darwin'`: only on macos
+  - `=os.platform()==='darwin'`: only on macos -->
 
-[literate markdown]: http://www.literateprogramming.com/knuthweb.pdf
+## Contributing
 
-f
+Contributions are always welcome!
+
+See `CONTRIBUTING.md` for ways to get started.
+
+Please adhere to a reasonable `code of conduct`.
+
+### Install or Run Locally
+
+```sh
+# Clone the project
+git clone git@github.com:sgregson/dotfiles-md.git
+# Go to the project directory
+cd dotfiles-md
+# Install dependencies
+yarn
+# Run the interactive CLI
+yarn start
+```
+
+## Roadmap
+
+- implement `action=run` for imperative settings (see [macos.md](src/macos/macos.md))
+- implement find-replace from `.env` files
+- implement `when=<conditions>` for to limit availability of code blocks (os.platform() = darwin, when nvm is availability)
+
+## FAQ
+
+#### Why markdown files?
+
+Specifically, **literate markdown**. IMHO dotfiles (or configuration in general) should be organized in a way that makes sense to you for fast recall and organization. From there you can choose whether to manipulate your `$PATH` or direct them to known defaults (like `~/.gitconfig` vs `!/.config/git/config`).
+
+I also really liked the topic-centric approach of other dotfiles managers (like [holman/dotfiles](https://github.com/holman/dotfiles)) but found I need to give myself WAY more context on the operations than code comments since I update them so infrequently.
+
+#### Why an interactive CLI?
+
+All my old dotfiles systems relied on either a "bag of scripts" folder or someone else's CLI. I loved using [kody](https://github.com/jh3y/kody) for a long time, but updating the dotfiles became difficult as my config grew stale.
+
+#### Why the repo structure?
+
+- `demo/`: A functional demo folder of dotfiles. see demo/README.md
+- `dotfiles/`: My actual, personal, dotfiles. Use for inspiration or whatever
+- `src/`: the CLI script codebase
+
+## Related
+
+Here are some related projects
+
+[Awesome README](https://github.com/matiassingers/awesome-readme)
