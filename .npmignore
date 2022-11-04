@@ -8,3 +8,4 @@ node_modules/
 # personal dotfiles
 dotfiles/
 demo/build/
+docs/
