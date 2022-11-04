@@ -40,6 +40,7 @@
   },
   "dependencies": {
     "@moleculer/vorpal": "^1.11.5",
+    "colors": "^1.4.0",
     "dotenv": "^16.0.3",
     "escape-string-regexp": "^5.0.0",
     "fs-extra": "^10.1.0",

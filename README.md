@@ -56,16 +56,14 @@ The **`[...options]` array** is a space-delimited list of `key=value` directives
 
 **Codeblock Options (and actions)**
 
-- `disabled=true` disable this code block from being run (helpful for migrations)
 - `title=<string>` a title for the code block to appear in the CLI. `<string>` **msut not** contain spaces.
-- `action` defines what to do with the content
+- `action` defines what to do with the content:
   - `=build`: build the file to `[filePath]`, replacing content as appropriate
   - `=symlink`: find-replace patterns (`%...`) in the codeblock and symlink the result (from `/build`) to `[filePath]`
   - `=run`: run this code block according to the file syntax (js: node, sh: bash, zsh) TODO: not implemented yet
-
-<!-- - `when` defines the availability of this codeblock
-  - `=npm`: when npm is available (after nvm install)
-  - `=os.platform()==='darwin'`: only on macos -->
+- `when` defines the availability of this codeblock
+  - `=os.darwin`, `=os.win32`: platform-specific dotfiles
+- `disabled=true` disable this code block from being run (helpful for migrations)
 
 ## Contributing
 
@@ -90,9 +88,9 @@ yarn start
 
 ## Roadmap
 
+- [x] implement `when=<conditions>` (v0.3.0)
 - implement `action=run` for imperative settings (see [macos.md](src/macos/macos.md))
 - implement find-replace from `.env` files
-- implement `when=<conditions>` for to limit availability of code blocks (os.platform() = darwin, when nvm is availability)
 
 ## FAQ
 

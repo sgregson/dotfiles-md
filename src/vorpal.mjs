@@ -8,11 +8,24 @@ import glob from "glob";
 import Vorpal from "@moleculer/vorpal";
 import inquirer from "inquirer";
 import { toMdAST } from "./api.mjs";
+import colors from "colors/safe.js";
 
 const CLI = Vorpal();
 const UUID = "dev.sgregson.dotfiles-cli";
 const DEFAULT_PATTERN = "**/*.md";
 const homeDirectory = os.homedir();
+colors.setTheme({
+  silly: "rainbow",
+  input: "grey",
+  verbose: "cyan",
+  prompt: "grey",
+  info: "green",
+  data: "grey",
+  help: "cyan",
+  warn: "yellow",
+  debug: "blue",
+  error: "red",
+});
 
 CLI.history(UUID);
 CLI.localStorage(UUID);
@@ -171,8 +184,7 @@ CLI.command("run", "run a dotfiles build")
     if ((argSelected || argPattern) && argActions) {
       // use selected files if provided, otherwise "all"
       blocksToRun = blocks.filter(
-        (block) =>
-          blockTypes.includes(block.options.action) && !block.options?.disabled
+        (block) => blockTypes.includes(block.options.action) && !block.disabled
       );
     }
 
@@ -207,17 +219,11 @@ CLI.command("run", "run a dotfiles build")
               `${filePath} (${runnableBlocks.length} of ${fileBlocks.length})`
             ),
             runnableBlocks.map((block) => ({
-              name:
-                block.options.title ??
-                `${block.meta}\n   ${block.content
-                  .split("\n")
-                  .map((line) => `${line}`)
-                  .join("(...)")}`,
+              name: block.options?.title ?? block.meta,
               value: block,
-              disabled: block.options?.disabled && "disabled!",
+              disabled: block.disabled,
               checked:
-                blockTypes.includes(block.options?.action) &&
-                !block.options?.disabled,
+                blockTypes.includes(block.options?.action) && !block.disabled,
             })),
           ];
         })
@@ -300,7 +306,7 @@ async function getRunnableBlocks(inputFiles) {
         .map(({ lang, meta, value }) => {
           const options = meta?.split(" ") ?? [];
 
-          return {
+          const block = {
             lang,
             meta,
             targetPath: options
@@ -314,10 +320,42 @@ async function getRunnableBlocks(inputFiles) {
             content: value,
             source: filePath,
           };
+
+          return {
+            ...block,
+            disabled: isDisabled(block),
+          };
         })
     );
   }
   return files;
+}
+
+/**
+ * Check whether the block should be permitted to run, commonly:
+ * disabled=true, when=os.darwin, when=os.win32
+ *
+ * @param {obj} thisBlock the object representing the markdown codeblock
+ * @returns string | false (string values are rendered in the UI)
+ */
+function isDisabled(thisBlock) {
+  // returns false or a string for a reason
+  if (thisBlock.options?.disabled) return colors.error("disabled=true");
+  if (thisBlock.options?.when) {
+    switch (thisBlock.options.when) {
+      case "os.darwin":
+        return os.platform() !== "darwin"
+          ? colors.warn("when!=os.darwin")
+          : false;
+      case "os.win32":
+        return os.platform() !== "win32"
+          ? colors.warn("when!=os.win32")
+          : false;
+      default:
+        break;
+    }
+  }
+  return false;
 }
 async function executeBlock(block, i) {
   const {
