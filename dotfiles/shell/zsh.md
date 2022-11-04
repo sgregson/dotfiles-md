@@ -2,7 +2,7 @@
 
 Load NVM automatically based on directory
 
-```zsh $HOME/.custom/nvm.sh action=symlink title=nvm-loader
+```sh $HOME/.custom/nvm.sh action=symlink title=nvm-loader
 # source $HOME/.custom/nvm.sh 'callsite'
 if [ -d ~/.nvm/ ]; then
 # load NVM
@@ -87,14 +87,14 @@ add-zsh-hook chpwd auto-switch-node-version
 auto-switch-node-version
 ```
 
-```zsh $HOME/.custom/glob.sh action=symlink title=zsh-extended-globbing
+```sh $HOME/.custom/glob.sh action=symlink title=zsh-extended-globbing
 #! /bin/zsh
 # Permit ZSH extended globbing
 # only include in interactive shells (zshrc) - https://unix.stackexchange.com/questions/431805/zsh-is-there-a-problem-with-always-enabling-extended-glob
 setopt extended_glob
 ```
 
-```zsh $HOME/.custom/zmv.sh action=symlink title=zmv-for-build-rename
+```sh $HOME/.custom/zmv.sh action=symlink title=zmv-for-build-rename
 # Dry Run:$ zmv -n 'Page(*)/shot.jpg' 'shot-${1}.jpg'
 # Actual: $ zmv 'Page(*)/shot.jpg' 'shot-${1}.jpg'
 autoload zmv
@@ -103,7 +103,7 @@ alias zcp='zmv -C'
 alias zln='zmv -L'
 ```
 
-```zsh $HOME/.custom/env.sh action=symlink title=environment-variables
+```sh $HOME/.custom/env.sh action=symlink title=environment-variables
 # Manage environment variables with 1Password CLI (was installed via homebrew)
 # op signin [VaultName]
 echo "...fetch env"
@@ -122,7 +122,7 @@ fi
 
 ## Shared Environment (.zshenv)
 
-```zsh $HOME/.zshenv action=symlink title=zshenv
+```sh $HOME/.zshenv action=symlink title=zshenv
 # install nvm on first run,
 # probably not a good idea to do here
 # source $HOME/.custom/nvm.sh 'zshenv'
@@ -134,7 +134,7 @@ The profile file for non-interactive terminal windows.
 
 Generally, only put the things in here you'd want to have available to scripts (not open terminal windows)
 
-```zsh $HOME/.zprofile action=symlink title=zprofile
+```sh $HOME/.zprofile action=symlink title=zprofile
 export PATH="$PATH:$(python3 -m site --user-base)/bin"
 # Enable rbenv for sublime plugins (linting)
 # export PATH="$HOME/.rbenv/bin:$PATH"
@@ -149,7 +149,7 @@ source $HOME/.custom/nvm.sh 'zprofile'
 
 ## Login Shells(.zshrc)
 
-```zsh $HOME/.zshrc action=symlink title=zshrc-LATEST
+```sh $HOME/.zshrc action=symlink title=zshrc-LATEST
 # If you come from bash you might have to change your $PATH.
 # export PATH=$HOME/bin:/usr/local/bin:$PATH
 
@@ -224,7 +224,7 @@ echo "nvm $(nvm --version) (run 'nvm use stable')"
 
 ## Login Shell (DEPRECATED)
 
-```zsh $HOME/.zshrc action=symlink title=zshrc-OLD disabled=true
+```sh $HOME/.zshrc action=symlink title=zshrc-old disabled=true
 # Path to your oh-my-zsh installation.
 export ZSH=$HOME/.oh-my-zsh
 

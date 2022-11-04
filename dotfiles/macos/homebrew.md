@@ -1,4 +1,4 @@
-```sh action=run title=taps
+```sh action=run title=taps when=os.darwin
 brew tap buildkite/cli
 brew tap caskroom/fonts
 brew tap homebrew/bundle
@@ -8,11 +8,11 @@ brew tap mapbox/cli
 brew tap welldan97/whereami
 ```
 
-```sh action=run title=install-all-nerd-fonts
+```sh action=run title=install-all-nerd-fonts when=os.darwin
 brew install $( brew search font | grep nerd | tr '\n' ' ' )
 ```
 
-```sh action=run title=formulas
+```sh action=run title=formulas when=os.darwin
 # brew install git
 brew install bk;
 brew install gitleaks; #secret scanning for git repos
@@ -31,7 +31,7 @@ brew install zsh;
 brew install zsh-completions;
 ```
 
-```sh action=run title=casks
+```sh action=run title=casks when=os.darwin
 brew install --cask 1password/tap/1password-cli
 brew install --cask alfred
 brew install --cask bitbar
