@@ -27,6 +27,7 @@
     "prejfdi": "yarn",
     "jfdi": "cd dotfiles; node ../cli.mjs run -- --pattern \"**/*.md\" --actions symlink,build; cd -",
     "doit": "cd dotfiles; node ../cli.mjs run -- --pattern \"**/*.md\" --actions symlink,build; cd -",
+    "start": "node ./cli.mjs",
     "test": "echo \"STATUS: no test specified\""
   },
   "publishConfig": {
