@@ -110,9 +110,3 @@ All my old dotfiles systems relied on either a "bag of scripts" folder or someon
 - `demo/`: A functional demo folder of dotfiles. see demo/README.md
 - `dotfiles/`: My actual, personal, dotfiles. Use for inspiration or whatever
 - `src/`: the CLI script codebase
-
-## Related
-
-Here are some related projects
-
-[Awesome README](https://github.com/matiassingers/awesome-readme)
