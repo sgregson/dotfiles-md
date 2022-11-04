@@ -1,1 +1,0 @@
-/Users/sgregson/Documents/Code/Non-Work/dot-md/demo/build/links/2-local-symlink.md
