@@ -56,7 +56,7 @@ The **`[...options]` array** is a space-delimited list of `key=value` directives
 
 **Codeblock Options (and actions)**
 
-- `title=<string>` a title for the code block to appear in the CLI. `<string>` **msut not** contain spaces.
+- `title=<string>` a title for the code block to appear in the CLI. `<string>` **must not** contain spaces.
 - `action` defines what to do with the content:
   - `=build`: build the file to `[filePath]`, replacing content as appropriate
   - `=symlink`: find-replace patterns (`%...`) in the codeblock and symlink the result (from `/build`) to `[filePath]`
