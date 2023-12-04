@@ -1,4 +1,4 @@
-![logo – an arrow from a glob of markdown to a glob of dotfiles](docs/banner.png)
+![logo – an arrow from a glob of markdown to a glob of dotfiles](./docs/banner.png)
 
 <!-- Banner Image Source: <div style="width:100%;height:3em;font-size:3.6rem;font-weight:bold;background:linear-gradient(-0.075turn,#3f87a6,#ebf8e1,#f69d3c);color:white;text-shadow:1px 1px 3px black;display:grid;place-items:center;margin:2em 0"><div><code>*/.md</code> → <code>~/.*</code></div></div>
 -->
