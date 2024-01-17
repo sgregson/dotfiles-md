@@ -89,7 +89,7 @@ yarn start
 ## Roadmap
 
 - [x] implement `when=<conditions>` (v0.3.0)
-- implement `action=run` for imperative settings (see [macos.md](src/macos/macos.md))
+- implement `action=run` for imperative settings (see [macos.md](dotfiles/macos/macos.md))
 - implement find-replace from `.env` files
   - idea: command to find all replacement keys in dotfiles (create a `.env.schema` from MD contents) for use with `dotenv-extended`
 - Title codeblocks from nearest heading (To support spaces and use as fallback for missing `title=`)

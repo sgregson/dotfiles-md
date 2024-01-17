@@ -15,6 +15,7 @@ brew install $( brew search font | grep nerd | tr '\n' ' ' )
 ```sh action=run title=formulas when=os.darwin
 # brew install git
 brew install bk;
+brew install deno;
 brew install gitleaks; #secret scanning for git repos
 brew install imgcat;
 brew install joeyhoer/extras/gzthermal;
@@ -45,16 +46,23 @@ brew install --cask fluid
 brew install --cask flux
 brew install --cask font-fira-code
 brew install --cask google-chrome
+brew install --cask google-chrome
 brew install --cask iterm2-beta
 brew install --cask mattr-slate
-brew install --cask meld
+# brew install --cask meld (replaced with vscode)
+brew install --cask numi
 brew install --cask phoenix
 brew install --cask processing
-brew install --cask scroll-reverser
-brew install --cask shady
+brew install --cask unnaturalscrollwheels # more reliable than scroll-reverser
+# brew install --cask shady
 brew install --cask skitch
 brew install --cask slack
 brew install --cask spotify
 brew install --cask steam
-brew install --cask sublime-text-dev
+# brew install --cask sublime-text-dev
+```
+
+```sh $HOME/.custom/gcloud-brew.sh action=symlink title=gcloud-completions when=os.darwin
+source "$(brew --prefix)/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/path.zsh.inc"
+source "$(brew --prefix)/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/completion.zsh.inc"
 ```

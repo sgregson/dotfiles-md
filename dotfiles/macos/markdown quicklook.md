@@ -1,6 +1,6 @@
 Preview markdown files in MacOS quicklook (finder spacebar) https://github.com/sbarex/QLMarkdown
 
-```sh action=run title=install
+```sh action=run title=install-qlmarkdown
 brew install --cask qlmarkdown
 ```
 

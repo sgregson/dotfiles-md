@@ -1,12 +1,21 @@
 # Global gitconfig
 
+```ini $HOME/.gitconfig-csnzoo action=build title=gitconfig(work-id)
+[user]
+  name = Spencer Gregson
+  email = sgregson@wayfair.com
+  signingkey = 376AA48582F8ADAFA44B47A1FB5A1923EFF83E21
+```
+
 ```ini $HOME/.gitconfig action=symlink title=gitconfig(global)
 [init]
   templatedir = ~/.git-templates
 [user]
   name = Spencer Gregson
   email = sgregson@users.noreply.github.com
-  signingkey = 376AA48582F8ADAFA44B47A1FB5A1923EFF83E21
+; [includeIf "hasconfig:remote.*.url:**/csnzoo/**"]
+[includeIf "gitdir:~/Documents/Code/Wayfair/"]
+  path = ~/.gitconfig-csnzoo
 [gpg]
   program = gpg
 [commit]
@@ -63,6 +72,7 @@
   hide-status = 0
   hide-dirty  = 1
 [push]
+  autoSetupRemote = true
   default = upstream
   # default = simple # n00b mode
 [alias]

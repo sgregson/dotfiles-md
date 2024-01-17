@@ -1,6 +1,7 @@
 # Phoenix JS
 
 ```js $HOME/.phoenix.js action=symlink title=phoenix-install
+/// <reference path="../../../types/phoenix.d.ts" />
 "use strict";
 /*globals Phoenix Window App Key Screen Space*/
 Phoenix.notify("initializing");
@@ -25,6 +26,7 @@ var TERMINAL = "iTerm2";
 var CHAT = "Slack";
 var NOTES = "Notion";
 var PLAYER = "Spotify";
+var CALENDAR = "Cron";
 
 // APPLICATION TRIGGERS
 Key.on("j", HYPER, () => logged(openFocusHide)(BROWSER));
@@ -280,65 +282,25 @@ function stateToggle(_tests, _win = Window.focused()) {
 /**
  * default layout uses screens or spaces to segment primary/secondary workspace
  */
+const LAYOUT_SPACING_UNIT = 35;
 function triggerLayout() {
-  // Guard against errors
-  if (Screen.all().length === 1 && Space.all().length === 1) {
+  let layout;
+  // use regions[i] to access specific screens
+  const regions = Screen.all().map((s) => getRegions(s));
+
+  if (Screen.all().length === 3) {
+    layout = layout3screens(regions);
+  } else if (Screen.all().length === 2) {
+    layout = layout2screens(regions);
+  } else if (Space.all().lenth > 1) {
+    layout = layoutSpaces(regions);
+  } else {
+    // Guard against errors
     Phoenix.notify(
       "COULD NOT SET LAYOUT:\nlayout must have either muliple screens or multiple spaces"
     );
     return;
   }
-
-  const SPACE_UNIT = 35;
-
-  // If there's only one screen, you'll want to use spaces
-  const useScreens = Screen.all().length > 1;
-  const spaces = Space.all();
-
-  const screens = Screen.all();
-  // use regions[i] to access specific screens
-  const regions = screens.map((s) => getRegions(s));
-
-  const layout = {
-    [BROWSER]: (window, i, all) =>
-      useScreens
-        ? window.setFrame({
-            ...regions[1]["full-y"],
-            ...regions[1]["right-3"],
-            x: regions[1]["right-3"].x - i * SPACE_UNIT,
-            y: regions[1]["full-y"].y + (all.length - i - 1) * SPACE_UNIT,
-            height:
-              regions[1]["full-y"].height - (all.length - i - 1) * SPACE_UNIT,
-          })
-        : moveToSpace(0, { window }),
-    [EDITOR]: (window, i) =>
-      useScreens
-        ? window.setFrame({
-            ...regions[1]["full-y"],
-            ...regions[1]["left-2/3"],
-            width:
-              regions[1]["left-2/3"].width -
-              (App.get(BROWSER)
-                .windows()
-                .filter((w) => w.isVisible()).length +
-                App.get(EDITOR)
-                  .windows()
-                  .filter((w) => w.isVisible()).length -
-                // two windows should be an even 2:1 split
-                2) *
-                SPACE_UNIT,
-            x: regions[1]["left-2/3"].x + i * SPACE_UNIT,
-          })
-        : moveToSpace(0, { window }),
-    [CHAT]: (window, i) => {
-      moveToSpace(useScreens ? 0 : 1, { window });
-      window.setFrame(regions[0]["left-2/3"]);
-    },
-    [NOTES]: (window, i) => {
-      moveToSpace(useScreens ? 0 : 1, { window });
-      window.setFrame(regions[0]["right-2/3"]);
-    },
-  };
 
   // cache the current window since we manipulate focus in the loop
   const _winStart = Window.focused();
@@ -360,6 +322,121 @@ function triggerLayout() {
 
   _winStart.focus();
   Phoenix.notify("Layout assigned.");
+}
+
+/**
+ * Layout Definition for 3-screen arrangement
+ *
+ * @param {Array} regions
+ * @returns Object
+ */
+function layout3screens() {
+  Phoenix.notify("3 Screen Layout");
+
+  // use regions[i] to access specific screens. regions are sorted left-to-right
+  let regions = Screen.all().sort((a, b) => a.frame().x - b.frame().x);
+  Phoenix.log(JSON.stringify(regions));
+
+  regions = regions.map((s) => getRegions(s));
+  Phoenix.log(JSON.stringify(regions));
+
+  return {
+    [BROWSER]: (window, i, all) =>
+      window.setFrame({
+        ...regions[0]["full-y"],
+        ...regions[0]["right-3"],
+        x: regions[0]["right-3"].x - i * LAYOUT_SPACING_UNIT,
+        y: regions[0]["full-y"].y + (all.length - i - 1) * LAYOUT_SPACING_UNIT,
+        height:
+          regions[0]["full-y"].height -
+          (all.length - i - 1) * LAYOUT_SPACING_UNIT,
+      }),
+    [EDITOR]: (window) =>
+      window.setFrame({
+        ...regions[2]["full-y"],
+        ...regions[2]["full-x"],
+      }),
+    [CHAT]: (window, i) => {
+      moveToSpace(0, { window });
+      window.setFrame({
+        ...regions[0]["left-2/3"],
+        ...regions[0]["full-y"],
+        width:
+          regions[0]["left-2/3"].width -
+          (App.get(BROWSER)
+            .windows()
+            .filter((w) => w.isVisible()).length +
+            App.get(CHAT)
+              .windows()
+              .filter((w) => w.isVisible()).length -
+            // two windows should be an even 2:1 split
+            2) *
+            LAYOUT_SPACING_UNIT,
+        x: regions[0]["left-2/3"].x + i * LAYOUT_SPACING_UNIT,
+      });
+    },
+    [CALENDAR]: (window, i) => {
+      window.setFrame({ ...regions[1]["full-x"], ...regions[1]["bottom"] });
+    },
+    [NOTES]: (window, i) => {
+      moveToSpace(0, { window });
+      window.setFrame({ ...regions[1]["full-x"], ...regions[1]["top"] });
+    },
+  };
+}
+function layout2screens(regions) {
+  Phoenix.notify("2 Screen Layout");
+  return {
+    [BROWSER]: (window, i, all) =>
+      window.setFrame({
+        ...regions[1]["full-y"],
+        ...regions[1]["right-3"],
+        x: regions[1]["right-3"].x - i * LAYOUT_SPACING_UNIT,
+        y: regions[1]["full-y"].y + (all.length - i - 1) * LAYOUT_SPACING_UNIT,
+        height:
+          regions[1]["full-y"].height -
+          (all.length - i - 1) * LAYOUT_SPACING_UNIT,
+      }),
+    [EDITOR]: (window, i) =>
+      window.setFrame({
+        ...regions[1]["full-y"],
+        ...regions[1]["left-2/3"],
+        width:
+          regions[1]["left-2/3"].width -
+          (App.get(BROWSER)
+            .windows()
+            .filter((w) => w.isVisible()).length +
+            App.get(EDITOR)
+              .windows()
+              .filter((w) => w.isVisible()).length -
+            // two windows should be an even 2:1 split
+            2) *
+            LAYOUT_SPACING_UNIT,
+        x: regions[1]["left-2/3"].x + i * LAYOUT_SPACING_UNIT,
+      }),
+    [CHAT]: (window, i) => {
+      moveToSpace(0, { window });
+      window.setFrame(regions[0]["left-2/3"]);
+    },
+    [NOTES]: (window, i) => {
+      moveToSpace(0, { window });
+      window.setFrame(regions[0]["right-2/3"]);
+    },
+  };
+}
+function layoutSpaces(regions) {
+  return {
+    [BROWSER]: (window, i, all) => moveToSpace(0, { window }),
+    [EDITOR]: (window, i) => moveToSpace(0, { window }),
+    [CHAT]: (window, i) => {
+      moveToSpace(1, { window });
+      window.setFrame(regions[0]["left-2/3"]);
+    },
+    [NOTES]: (window, i) => {
+      moveToSpace(1, { window });
+      window.setFrame(regions[0]["right-2/3"]);
+    },
+  };
 }
 
 function moveToSpace(slot, { window }) {
@@ -386,6 +463,14 @@ function moveToNextScreen() {
  * debugger to log out the current state of the UI
  */
 function getInfo() {
+  Screen.all().forEach((s, i) =>
+    Phoenix.log(
+      `[Screen#all:${i}]`,
+      s.identifier(),
+      `\t${JSON.stringify(s.frame())}`
+    )
+  );
+
   const _win = Window.focused();
   Phoenix.log("[Window#focused]\t", _win.app().name(), ">", _win.title());
   Window.recent().forEach((w, i) =>

@@ -366,18 +366,18 @@ async function executeBlock(block, i) {
     lang,
   } = block;
   const buildDir = path.join(process.cwd(), "build");
-  let maybeTarget;
+  let targetFile;
 
   if (action === "build" || action === "symlink") {
-    maybeTarget = path.resolve(path.dirname(source), targetPath);
+    targetFile = path.resolve(path.dirname(source), targetPath);
   }
 
   switch (action) {
     case "build":
       // make sure the folder is available before writing
-      await fs.ensureFile(maybeTarget);
-      await fs.writeFile(maybeTarget, content).then(() => {
-        CLI.log(`🔨 built ${path.relative(process.cwd(), maybeTarget)}`);
+      await fs.ensureFile(targetFile);
+      await fs.writeFile(targetFile, content).then(() => {
+        CLI.log(`🔨 built ${path.relative(process.cwd(), targetFile)}`);
       });
       break;
     case "symlink":
@@ -385,10 +385,10 @@ async function executeBlock(block, i) {
         buildDir,
         "links",
         // named for the originating file, with $i to dedupe multiple symlinks
-        `${i}-${path.parse(maybeTarget).base}`
+        `${i}-${path.parse(targetFile).base}`
       );
       await fs.ensureDir(path.dirname(buildFile));
-      await fs.ensureDir(path.dirname(maybeTarget));
+      await fs.ensureDir(path.dirname(targetFile));
 
       // build the source file and symlink it
       await fs.writeFile(buildFile, content).then(
@@ -399,15 +399,15 @@ async function executeBlock(block, i) {
           await fs.writeFile(buildFile, content);
         }
       );
-      await fs.ensureSymlink(buildFile, maybeTarget).then(
+      await fs.ensureSymlink(buildFile, targetFile).then(
         // prettier-ignore
-        () => CLI.log(`🔗 linked ${maybeTarget} to ${path.relative(process.cwd(),buildFile)}`),
+        () => CLI.log(`🔗 linked ${targetFile} to ${path.relative(process.cwd(),buildFile)}`),
         async (err) => {
           // backup & move old version
           await fs
-            .move(maybeTarget, maybeTarget + `.bak-${Date.now()}`)
+            .move(targetFile, targetFile + `.bak-${Date.now()}`)
             .catch(() => {});
-          await fs.ensureSymlink(buildFile, maybeTarget).catch(() => {});
+          await fs.ensureSymlink(buildFile, targetFile).catch(() => {});
         }
       );
       break;

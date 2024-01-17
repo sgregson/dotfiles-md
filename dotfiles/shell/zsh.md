@@ -94,6 +94,12 @@ auto-switch-node-version
 setopt extended_glob
 ```
 
+```sh $HOME/.custom/wayfair.sh action=symlink title=shell-aliases
+#! /bin/zsh
+
+alias wayproxy="docker run --rm -p 443:443 -v ~/.local-certs:/certs wayfair/local-https-proxy"
+```
+
 ```sh $HOME/.custom/zmv.sh action=symlink title=zmv-for-build-rename
 # Dry Run:$ zmv -n 'Page(*)/shot.jpg' 'shot-${1}.jpg'
 # Actual: $ zmv 'Page(*)/shot.jpg' 'shot-${1}.jpg'
@@ -206,7 +212,11 @@ HIST_STAMPS="yyyy-mm-dd"
 
 # Standard plugins can be found in $ZSH/plugins/
 # Custom plugins may be added to $ZSH_CUSTOM/plugins/
-plugins=(git)
+plugins=(git web-search)
+ZSH_WEB_SEARCH_ENGINES=(
+  reddit "https://www.reddit.com/search/?q="
+  npmjs "https://www.npmjs.com/search?q="
+)
 
 # Load it!
 source $ZSH/oh-my-zsh.sh
@@ -216,6 +226,8 @@ source $HOME/.custom/git.sh
 source $HOME/.custom/env.sh
 source $HOME/.custom/zmv.sh
 source $HOME/.custom/glob.sh
+source $HOME/.custom/gcloud-brew.sh
+source $HOME/.custom/wayfair.sh
 
 export GPG_TTY=$(tty)
 
