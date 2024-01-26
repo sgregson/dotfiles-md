@@ -13,11 +13,15 @@
 [user]
   name = Spencer Gregson
   email = sgregson@users.noreply.github.com
+  signingkey = ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIN8v19rW4ftIjw2zofl4kzDYvtSko9X8DG0NHXWPA1g1
 ; [includeIf "hasconfig:remote.*.url:**/csnzoo/**"]
 [includeIf "gitdir:~/Documents/Code/Wayfair/"]
   path = ~/.gitconfig-csnzoo
 [gpg]
-  program = gpg
+  program = gpgs
+  format = ssh
+[gpg "ssh"]
+  program = "/Applications/1Password.app/Contents/MacOS/op-ssh-sign"
 [commit]
   gpgSign = true
 	template = /Users/sgregson/.gitmessage
