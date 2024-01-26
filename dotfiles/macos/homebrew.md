@@ -46,7 +46,7 @@ brew install --cask fluid
 brew install --cask flux
 brew install --cask font-fira-code
 brew install --cask google-chrome
-brew install --cask google-chrome
+brew install --cask google-cloud-sdk
 brew install --cask iterm2-beta
 brew install --cask mattr-slate
 # brew install --cask meld (replaced with vscode)
@@ -63,6 +63,6 @@ brew install --cask steam
 ```
 
 ```sh $HOME/.custom/gcloud-brew.sh action=symlink title=gcloud-completions when=os.darwin
-source "$(brew --prefix)/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/path.zsh.inc"
-source "$(brew --prefix)/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/completion.zsh.inc"
+source "$(brew --prefix)/share/google-cloud-sdk/path.zsh.inc"
+source "$(brew --prefix)/share/google-cloud-sdk/completion.zsh.inc"
 ```
