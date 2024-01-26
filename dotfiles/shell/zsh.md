@@ -147,7 +147,8 @@ export PATH="$PATH:$(python3 -m site --user-base)/bin"
 # eval "$(rbenv init -)"
 
 # Set PATH, MANPATH, etc., for Homebrew.
-eval "$(/opt/homebrew/bin/brew shellenv)"
+# /Users/sgregson/.zprofile:7: no such file or directory: /opt/homebrew/bin/brew
+eval "$(/usr/local/bin/brew shellenv)"
 
 # Enable NVM for sublime plugins
 source $HOME/.custom/nvm.sh 'zprofile'
