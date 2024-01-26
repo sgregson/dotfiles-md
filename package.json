@@ -17,7 +17,7 @@
     "cli"
   ],
   "engines": {
-    "node": ">15"
+    "node": ">18"
   },
   "os": [
     "darwin"
