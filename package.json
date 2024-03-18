@@ -53,6 +53,6 @@
     "unist-util-visit": "^4.1.1"
   },
   "devDependencies": {
-    "np": "^9.2.0"
+    "np": "^10.0.1"
   }
 }
