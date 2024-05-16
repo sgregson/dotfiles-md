@@ -23,12 +23,12 @@ brew install jq;
 brew install jrnl;
 # brew install kryptco/tap/kr
 brew install mapbox/cli/mapbox;
-brew install mr;
+# brew install mr;
 brew install pinentry-mac; # GPG Pinentry command
 brew install rbenv;
 brew install spark;
 brew install whereami;
-brew install zsh;
+# brew install zsh;
 brew install zsh-completions;
 ```
 

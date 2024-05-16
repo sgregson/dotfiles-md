@@ -2,7 +2,12 @@
 
 Load NVM automatically based on directory
 
-```sh $HOME/.custom/nvm.sh action=symlink title=nvm-loader
+```sh $HOME/.custom/fnm.sh action=symlink title=fnm-loader
+echo "...using fnm ($1)"
+eval "$(fnm env --use-on-cd)"
+```
+
+```sh $HOME/.custom/nvm.sh action=symlink title=nvm-loader disabled=true
 # source $HOME/.custom/nvm.sh 'callsite'
 if [ -d ~/.nvm/ ]; then
 # load NVM
@@ -131,7 +136,7 @@ fi
 ```sh $HOME/.zshenv action=symlink title=zshenv
 # install nvm on first run,
 # probably not a good idea to do here
-# source $HOME/.custom/nvm.sh 'zshenv'
+# source $HOME/.custom/fnm.sh 'zshenv' TODO: can't load since homebrew hasn't loaded yet
 ```
 
 ## Non-interactive shells (zprofile)
@@ -148,15 +153,36 @@ export PATH="$PATH:$(python3 -m site --user-base)/bin"
 
 # Set PATH, MANPATH, etc., for Homebrew.
 # /Users/sgregson/.zprofile:7: no such file or directory: /opt/homebrew/bin/brew
-eval "$(/usr/local/bin/brew shellenv)"
+# eval "$(/usr/local/bin/brew shellenv)"
+eval "$(/opt/homebrew/bin/brew shellenv)"
+
 
 # Enable NVM for sublime plugins
-source $HOME/.custom/nvm.sh 'zprofile'
+# source $HOME/.custom/nvm.sh 'zprofile'
+source $HOME/.custom/fnm.sh 'zprofile'
 ```
 
 ## Login Shells(.zshrc)
 
-```sh $HOME/.zshrc action=symlink title=zshrc-LATEST
+```sh $HOME/.zshrc action=symlink title=zshrc
+# User Config (references to other dotfiles)
+# source $HOME/.custom/omz.sh TODO: 2024-05-16 no longer using omz
+source $HOME/.custom/git.sh
+source $HOME/.custom/env.sh
+source $HOME/.custom/zmv.sh
+source $HOME/.custom/glob.sh
+source $HOME/.custom/gcloud-brew.sh
+# source $HOME/.custom/wayfair.sh TODO: 2024-05-16 no longer using omz
+
+export GPG_TTY=$(tty)
+
+# echo "nvm $(nvm --version) (run 'nvm use stable')" TODO: 2024-05-16 no longer using nvm
+echo "fnm $(fnm current)"
+```
+
+## Oh My ZSH (.custom/oh-my-zsh) DEPRECATED
+
+```sh $HOME/.custom/omz.sh action=symlink title=oh-my-zsh
 # If you come from bash you might have to change your $PATH.
 # export PATH=$HOME/bin:/usr/local/bin:$PATH
 
@@ -221,18 +247,6 @@ ZSH_WEB_SEARCH_ENGINES=(
 
 # Load it!
 source $ZSH/oh-my-zsh.sh
-
-# User Config (references to other dotfiles)
-source $HOME/.custom/git.sh
-source $HOME/.custom/env.sh
-source $HOME/.custom/zmv.sh
-source $HOME/.custom/glob.sh
-source $HOME/.custom/gcloud-brew.sh
-source $HOME/.custom/wayfair.sh
-
-export GPG_TTY=$(tty)
-
-echo "nvm $(nvm --version) (run 'nvm use stable')"
 ```
 
 ## Login Shell (DEPRECATED)
