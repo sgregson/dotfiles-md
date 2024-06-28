@@ -39,7 +39,8 @@ brew install zsh-completions;
 ```sh action=run title=casks when=os.darwin
 brew install --cask 1password/tap/1password-cli;
 brew install --cask alfred;
-brew install --cask bitbar;
+# brew install --cask bitbar;
+brew install --cask cleanshot;
 # brew install --cask cloudapp;
 brew install --cask daisydisk;
 # brew install --cask diffmerge;
@@ -52,14 +53,16 @@ brew install --cask flux;
 brew install --cask font-fira-code;
 brew install --cask google-chrome;
 brew install --cask google-cloud-sdk;
-brew install --cask google-drive
+brew install --cask google-drive;
+brew install --cask hiddenbar; # collapsible macos menubar
 # brew install --cask iterm2-beta;
 # brew install --cask mattr-slate;
 # brew install --cask meld (replaced with vscode)
 brew install --cask numi;
 brew install --cask phoenix;
 brew install --cask processing;
-brew install --cask unnaturalscrollwheels; # more reliable than scroll-reverser
+# unnaturalscrollwheels is generally more reliable than scroll-reverser
+brew install --cask unnaturalscrollwheels; 
 # brew install --cask shady;
 # brew install --cask skitch;
 brew install --cask slack;
