@@ -57,11 +57,13 @@
   prune = true
 [merge]
   conflictstyle = diff3
-  tool = meld
+  tool = vscode
   keepBackup = false
 [mergetool]
   prompt = false
   keepBackup = false
+[mergetool "vscode"]
+  cmd = code --wait --merge $BASE $LOCAL $REMOTE $MERGED
 [mergetool "meld"]
   trustExitCode = true
   cmd = open -W -a Meld --args --auto-merge \"$PWD/$LOCAL\" \"$PWD/$BASE\" \"$PWD/$REMOTE\" --output=\"$PWD/$MERGED\"
