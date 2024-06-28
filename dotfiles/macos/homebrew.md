@@ -17,6 +17,7 @@ brew install asdf;
 # brew install git
 brew install bk;
 brew install deno;
+brew install fzf;
 brew install gitleaks; #secret scanning for git repos
 brew install gh; # github CLI
 brew install imgcat;

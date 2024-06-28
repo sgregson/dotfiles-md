@@ -185,6 +185,9 @@ export GPG_TTY=$(tty)
 # echo "nvm $(nvm --version) (run 'nvm use stable')" TODO: 2024-05-16 no longer using nvm
 echo "fnm $(fnm current)"
 
+## source fuzzy find completions for zsh
+source <(fzf --zsh)
+
 # load ASDF tool
 source "$(brew --prefix asdf)/libexec/asdf.sh"
 
