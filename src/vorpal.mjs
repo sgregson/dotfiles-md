@@ -7,7 +7,7 @@ import glob from "glob";
 //--- cli utils
 import Vorpal from "@moleculer/vorpal";
 import inquirer from "inquirer";
-import { toMdAST } from "./api.mjs";
+import { toMdAST } from "./api.ts";
 import colors from "colors/safe.js";
 
 const CLI = Vorpal();
@@ -82,7 +82,7 @@ CLI.command("config", "configure your dotfiles application")
           message: "Select Action : ",
           choices: ["settings", "refresh", "reset"],
         },
-
+        // -------------
         {
           type: "confirm",
           name: "confirmReset",
