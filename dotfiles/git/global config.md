@@ -114,8 +114,8 @@
   diffout         = diff --full-index origin/master
   diffstat        = diff --stat -r
   diff-lessnode   = "! git diff --diff-filter=MAd origin/master...HEAD --name-only | grep -v '^node_modules/' | xargs git diff $MERGE_BASE --full-index"
-  u-stat          = "! git diff -M --full-index origin/master...HEAD --stat"
-  u-stat-open     = "! git diff -M --diff-filter=MAd --full-index origin/master...HEAD --name-status | grep -o \"[a-z\\.\\/_A-Z0-9]\\{2,\\}\" | xargs subl"
+  u-stat          = "! git diff -M --full-index origin/main...HEAD --stat"
+  u-stat-open     = "! git diff -M --diff-filter=MAd --full-index origin/main...HEAD --name-status | grep -o \"[a-z\\.\\/_A-Z0-9]\\{2,\\}\" | xargs code -a"
   # BRANCHES
   bd              = "for-each-ref --sort=committerdate refs/heads/ --format='%1B[0;31m%(committerdate:relative)%1B[m%09%(refname:short) [%1B[1;34m%(upstream:short)%1B[m]'"
   todo            = branch --no-merged
@@ -125,7 +125,7 @@
   last            = log -1 HEAD --stat -p
   log-line        = log --topo-order -u -L
   log-mine        = log --author="%GIT_NAME" --topo-order --reverse -u -L
-  log-u           = "! MERGE_BASE=$(git merge-base origin/master HEAD); git log $MERGE_BASE..HEAD"
+  log-u           = "! MERGE_BASE=$(git merge-base origin/main HEAD); git log $MERGE_BASE..HEAD"
   staging-info    = "log --pretty=short --no-walk" # echo's info necessary for staging deployments (branch, commit#)
   # REMOTES
   rmorigin        = push --delete origin
@@ -140,15 +140,15 @@
   diff-exclude    =  ! git diff --name-only origin/master | grep -v -E "$1" | xargs git diff origin/master --full-index
   # IDENTITY
   whoami          = ! git config --get user.name && git config --get user.email
-  # %GIT_ALIASES
+
   # Workflow
   mark-done       = "! f() { git branch -m \"$1\" \"=$1\"; }; f"
   mark-ready      = "! f() { git branch -m \"$1\" \"+$1\"; }; f"
   permission-reset = "!git diff -p -R --no-color | grep -E \"^(diff|(old|new) mode)\" --color=never | git apply"
   ## Project Tracker
   # `git set-pt 123456` => appends _pt_123456 to the current branch name
-  set-pt          = "! this=$(git rev-parse --abbrev-ref HEAD); pre="_pt_"; that=$1; shift; soon=$this$pre$that; git branch -m $this $soon"
   # `git open-pt` => opens PT to the current branch's known pt#, assuming convention "branch_name_pt_123456"
+  set-pt          = "! this=$(git rev-parse --abbrev-ref HEAD); pre="_pt_"; that=$1; shift; soon=$this$pre$that; git branch -m $this $soon"
   open-pt         = "! pt=$(git rev-parse --abbrev-ref HEAD | rev | cut -d'_' -f 1 | rev); open \"https://admin.wayfair.com/tracker/views/142.php?PrtID=$pt\""
 ```
 
