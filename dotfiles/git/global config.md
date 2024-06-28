@@ -72,6 +72,8 @@
   trustExitCode = true
 [mergetool "tortoisemerge"]
   cmd = \""c:/Program Files/TortoiseSVN/bin/TortoiseMerge.exe"\" -base:"$BASE" -theirs:"$REMOTE" -mine:"$LOCAL" -merged:"$MERGED"
+[rebase]
+  autosquash = true
 [oh-my-zsh]
   hide-status = 0
   hide-dirty  = 1
@@ -92,6 +94,13 @@
   rom             = ! git fetch && git rebase origin/main
   mam             = ! git fetch && git merge origin/master
   ram             = ! git fetch && git rebase origin/master
+
+  # making fixes and patches
+  fixup = "!git log -n 50 --pretty=format:'%h %s' --no-merges | fzf | cut -c -7 | xargs -o git commit --fixup"
+  autosquash = "!git rebase -i --autosquash $(git merge-base origin/main HEAD)"
+
+  pop = "!git stash list | fzf | cut -d':' -f1 | xargs -o git stash pop"
+
   # BRANCH TRAVERSING
   go              = checkout
   go-tag          = "! git fetch --tags && git checkout $(git describe --tags `git rev-list --tags --max-count=1`)"
