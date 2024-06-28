@@ -173,7 +173,7 @@ source $HOME/.custom/fnm.sh 'zprofile'
 ```sh $HOME/.zshrc action=symlink title=zshrc
 # User Config (references to other dotfiles)
 # source $HOME/.custom/omz.sh TODO: 2024-05-16 no longer using omz
-source $HOME/.custom/git.sh
+source $HOME/.custom/aliases.sh
 source $HOME/.custom/env.sh
 source $HOME/.custom/zmv.sh
 source $HOME/.custom/glob.sh
