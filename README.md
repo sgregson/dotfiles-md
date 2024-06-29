@@ -56,14 +56,15 @@ The **`[...options]` array** is a space-delimited list of `key=value` directives
 
 **Codeblock Options (and actions)**
 
-- `title=<string>` a title for the code block to appear in the CLI. `<string>` **must not** contain spaces.
+- `title=<string>` a title for the code block to appear in the CLI. `<string>` must be quoted if it contains spaces.
 - `action` defines what to do with the content:
   - `=build`: build the file to `[filePath]`, replacing content as appropriate
   - `=symlink`: find-replace patterns (`%...`) in the codeblock and symlink the result (from `/build`) to `[filePath]`
-  - `=run`: run this code block according to the file syntax (js: node, sh: bash, zsh) TODO: not implemented yet
+  - `=run`: run this code block according to the file syntax (js: node, sh: bash, zsh)
+  - [ ] TODO: not implemented yet
 - `when` defines the availability of this codeblock
   - `=os.darwin`, `=os.win32`: platform-specific dotfiles
-- `disabled=true` disable this code block from being run (helpful for migrations)
+- `disabled=true` prevent a block from being run (helpful for migrations)
 
 ## Contributing
 
@@ -75,7 +76,7 @@ Please adhere to a reasonable `code of conduct`.
 
 ### Install or Run Locally
 
-```sh
+```sh action=run title="install and run dotfiles-md" disable=true
 # Clone the project
 git clone git@github.com:sgregson/dotfiles-md.git
 # Go to the project directory
