@@ -52,7 +52,7 @@ The **`<lang>` directive** is the usual markdown code block langauge format. It 
 
 A **`[filePath]` option** may be provided in order to direct the output of the code block. It **must not** contain an equals sign `=`.
 
-The **`[...options]` array** is a space-delimited list of `key=value` directives defining how the CLI should act on this code block (see next).
+The **`[...options]` array** is a space-delimited list of `key=value` directives defining how the CLI should act on this code block. Values must be quoted if they contain spaces as in, `key="Some Value"`.
 
 **Codeblock Options (and actions)**
 

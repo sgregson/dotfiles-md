@@ -1,28 +1,16 @@
-import { checkbox, confirm, select, Separator } from "@inquirer/prompts";
+import { confirm, select, editor, Separator } from "@inquirer/prompts";
 import {
-  toMdAST,
   globAsync,
   getRunnableBlocks,
   Block as BlockType,
+  existsSync,
+  cache,
+  Block,
+  clearScreen,
+  sleep,
 } from "./api.js";
 import { select as multiSelect } from "inquirer-select-pro";
-
-import glob, { IGlob } from "glob";
-
-// const aMenu = await checkbox({
-//   message: "Select a package manager",
-//   choices: [
-//     { name: "npm", value: "npm" },
-//     { name: "yarn", value: "yarn" },
-//     new Separator(),
-//     { name: "pnpm", value: "pnpm", disabled: true },
-//     {
-//       name: "pnpm",
-//       value: "pnpm",
-//       disabled: "(pnpm is not available)",
-//     },
-//   ],
-// });
+import colors from "colors/safe.js";
 
 interface State {
   status:
@@ -31,10 +19,13 @@ interface State {
     | "pickBlocks"
     | "inspect"
     | "makeDotfiles"
+    | "clearCache"
     | "exit";
   // file filter, glob-compatible
   filter: string;
+  // selected files
   files: string[];
+  // selected blocks
   blocks: BlockType[];
 }
 
@@ -45,8 +36,26 @@ let state: State = {
   blocks: [],
 };
 
+clearScreen();
+
+if (process.env.DOTFILE) {
+  let theFile = existsSync(process.env.DOTFILE);
+
+  if (theFile && (await confirm({ message: `Use ${theFile}?` }))) {
+    state.files = [theFile];
+    state.blocks = await getRunnableBlocks(state.files, {
+      includeDisabled: false,
+    });
+  }
+} else if (existsSync(cache.path)) {
+  if (await confirm({ message: "Load saved settings?" })) {
+    state = cache.get();
+  }
+}
+
 (async function Main() {
-  console.log("\u001b[2J\u001b[0;0H");
+  // Clear screen every main() cycle
+  clearScreen();
   console.log(
     `Selected: ${state.blocks.length} blocks from ${state.files.length} files`
   );
@@ -68,18 +77,25 @@ let state: State = {
         name: "Pick Blocks",
         value: "pickBlocks",
         description: "Pick the blocks you want to turn into dotfiles",
-        disabled: state.files.length === 0 && "(pick files first)",
+        disabled: state.files.length === 0,
       },
       {
         name: "Inspect Blocks",
         value: "inspect",
         description: "inspect the blocks before you add them to your system",
-        disabled: state.blocks.length === 0 && "(no blocks to inspect)",
+        disabled: state.blocks.length === 0,
       },
+      new Separator(),
       {
         name: "Make Dotfile",
         value: "makeDotfiles",
-        disabled: state.blocks.length === 0 && "(add files and blocks)",
+        description: "build your selected dotfiles",
+        disabled: state.blocks.length === 0,
+      },
+      {
+        name: "Clear Saved Settings",
+        value: "clearCache",
+        disabled: !existsSync(cache.path) && "(saved settings not found)",
       },
       { name: "exit", value: "exit" },
     ],
@@ -98,6 +114,9 @@ let state: State = {
     case "makeDotfiles":
       await makeDotfilesMenu();
       break;
+    case "clearCache":
+      await clearCacheMenu();
+      break;
     case "exit":
       await preExitMenu();
   }
@@ -109,19 +128,29 @@ async function pickFilesMenu() {
   const choice = await multiSelect({
     message: "Source Files",
     pageSize: 30,
+    canToggleAll: true,
+    loop: true,
+    defaultValue: state.files,
     options: async (input) => {
-      let matches = await globAsync(state.filter);
+      let matches = await globAsync(state.filter, {
+        ignore: "node_modules/**",
+      });
       if (input) {
         const inputLower = input.toLowerCase();
         matches = matches.filter((path) =>
           path.toLowerCase().includes(inputLower)
         );
       }
-      return matches.map((path) => ({ name: path, value: path }));
+      return matches.map((path) => ({
+        name: path,
+        value: path,
+      }));
     },
   });
 
-  if (choice) state.files = choice.filter((c): c is string => c !== null);
+  if (choice) {
+    state.files = choice.filter((c): c is string => c !== null);
+  }
 }
 
 async function pickBlocksMenu() {
@@ -129,8 +158,13 @@ async function pickBlocksMenu() {
     message: "Choose Blocks",
     pageSize: 30,
     canToggleAll: true,
+    loop: true,
+    defaultValue: state.blocks,
+    equals: (a, b) => a.content === b.content,
     options: async (input) => {
-      let matches = await getRunnableBlocks(state.files);
+      let matches = await getRunnableBlocks(state.files, {
+        includeDisabled: true,
+      });
 
       if (input) {
         const inputLower = input.toLowerCase();
@@ -140,14 +174,12 @@ async function pickBlocksMenu() {
       }
 
       return matches.map((block) => ({
-        name: block.meta ?? block.content,
+        name: block.label,
         value: block,
         checked: state.blocks.some(
           (selectedBlock) => selectedBlock.content === block.content
         ),
-        disabled: block.options?.disabled
-          ? `(${block.options?.disabled})`
-          : false,
+        disabled: block.disabled ? `(${block.disabled})` : false,
       }));
     },
   });
@@ -156,28 +188,79 @@ async function pickBlocksMenu() {
 }
 
 async function inspectMenu() {
-  const choice = await multiSelect({
+  // TODO: consider making this an "expand" menu
+  const thePreview = await multiSelect<Block | null, false>({
     message: "Inspect Blocks",
     pageSize: 30,
-    options: state.blocks.map((block) => ({
-      name: `${block.meta}\n${block.content}\n----------\n`,
-      value: block,
-      checked: true,
-    })),
+    multiple: false,
+    loop: true,
+    equals: (a, b) => a?.content === b?.content,
+    options: (input) => {
+      let matches = state.blocks;
+
+      if (input) {
+        const inputLower = input.toLowerCase();
+        matches = matches.filter((block) =>
+          block.meta.toLowerCase().includes(inputLower)
+        );
+      }
+
+      return [
+        { name: "<- BACK <-", value: null },
+        new Separator(),
+        ...matches.map((block) => ({
+          name: block.label,
+          value: block,
+        })),
+        new Separator(),
+      ];
+    },
   });
 
-  if (choice) state.blocks = choice;
+  if (thePreview) {
+    // [sourceFile] symlink(ini) -> .gitignore
+    console.log(
+      colors.underline(
+        `${colors.green(thePreview.source)} | ${thePreview.options?.action}(${
+          thePreview.lang
+        }) -> ${thePreview.options?.targetPath ?? ""}`
+      )
+    );
+
+    console.log(`${thePreview.content}\n`);
+
+    const keep = await confirm({
+      message: "Include this block?",
+    });
+
+    if (!keep) {
+      state.blocks = state.blocks.filter(
+        (someBlock) => someBlock.content !== thePreview.content
+      );
+    }
+    // return to the inspection menu
+    await inspectMenu();
+  }
 }
 
 async function makeDotfilesMenu() {
-  console.log("TODO!");
+  console.log("...coming soon!");
+  cache.set(state);
+  console.log("state saved! returning in 2s");
+  await sleep(2000);
 }
 
+async function clearCacheMenu() {
+  if (await confirm({ message: "are you sure?" })) {
+    cache.remove();
+  }
+}
 async function preExitMenu() {
-  if (await confirm({ message: "Continue?" })) {
+  if (await confirm({ message: "Save current settings?" })) {
     // TODO: create a .dotfiles-md cache file
-    process.exit(0);
+    cache.set(state);
+    console.log(`saved to ${cache.path}`);
   }
 
-  console.log("\n...resuming");
+  process.exit(0);
 }

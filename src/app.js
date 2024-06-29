@@ -1,14 +1,31 @@
-import { confirm, select } from "@inquirer/prompts";
-import { globAsync, getRunnableBlocks, } from "./api.js";
+import { confirm, select, Separator } from "@inquirer/prompts";
+import { globAsync, getRunnableBlocks, existsSync, cache, clearScreen, sleep, } from "./api.js";
 import { select as multiSelect } from "inquirer-select-pro";
+import colors from "colors/safe.js";
 let state = {
     status: "init",
     filter: "**/*.md",
     files: [],
     blocks: [],
 };
+clearScreen();
+if (process.env.DOTFILE) {
+    let theFile = existsSync(process.env.DOTFILE);
+    if (theFile && (await confirm({ message: `Use ${theFile}?` }))) {
+        state.files = [theFile];
+        state.blocks = await getRunnableBlocks(state.files, {
+            includeDisabled: false,
+        });
+    }
+}
+else if (existsSync(cache.path)) {
+    if (await confirm({ message: "Load saved settings?" })) {
+        state = cache.get();
+    }
+}
 (async function Main() {
-    console.log("\u001b[2J\u001b[0;0H");
+    // Clear screen every main() cycle
+    clearScreen();
     console.log(`Selected: ${state.blocks.length} blocks from ${state.files.length} files`);
     const choice = await select({
         message: "Main Menu",
@@ -26,18 +43,24 @@ let state = {
                 name: "Pick Blocks",
                 value: "pickBlocks",
                 description: "Pick the blocks you want to turn into dotfiles",
-                disabled: state.files.length === 0 && "(pick files first)",
+                disabled: state.files.length === 0,
             },
             {
                 name: "Inspect Blocks",
                 value: "inspect",
                 description: "inspect the blocks before you add them to your system",
-                disabled: state.blocks.length === 0 && "(no blocks to inspect)",
+                disabled: state.blocks.length === 0,
             },
             {
                 name: "Make Dotfile",
                 value: "makeDotfiles",
-                disabled: state.blocks.length === 0 && "(add files and blocks)",
+                description: "build your selected dotfiles",
+                disabled: state.blocks.length === 0,
+            },
+            {
+                name: "Clear Saved Settings",
+                value: "clearCache",
+                disabled: !existsSync(cache.path) && "(saved settings not found)",
             },
             { name: "exit", value: "exit" },
         ],
@@ -55,6 +78,9 @@ let state = {
         case "makeDotfiles":
             await makeDotfilesMenu();
             break;
+        case "clearCache":
+            await clearCacheMenu();
+            break;
         case "exit":
             await preExitMenu();
     }
@@ -64,63 +90,110 @@ async function pickFilesMenu() {
     const choice = await multiSelect({
         message: "Source Files",
         pageSize: 30,
+        canToggleAll: true,
+        loop: true,
+        defaultValue: state.files,
         options: async (input) => {
-            let matches = await globAsync(state.filter);
+            let matches = await globAsync(state.filter, {
+                ignore: "node_modules/**",
+            });
             if (input) {
                 const inputLower = input.toLowerCase();
                 matches = matches.filter((path) => path.toLowerCase().includes(inputLower));
             }
-            return matches.map((path) => ({ name: path, value: path }));
+            return matches.map((path) => ({
+                name: path,
+                value: path,
+            }));
         },
     });
-    if (choice)
+    if (choice) {
         state.files = choice.filter((c) => c !== null);
+    }
 }
 async function pickBlocksMenu() {
     const choice = await multiSelect({
         message: "Choose Blocks",
         pageSize: 30,
         canToggleAll: true,
+        loop: true,
+        defaultValue: state.blocks,
+        equals: (a, b) => a.content === b.content,
         options: async (input) => {
-            let matches = await getRunnableBlocks(state.files);
+            let matches = await getRunnableBlocks(state.files, {
+                includeDisabled: true,
+            });
             if (input) {
                 const inputLower = input.toLowerCase();
                 matches = matches.filter((block) => block.meta.toLowerCase().includes(inputLower));
             }
-            return matches.map((block) => {
-                var _a, _b, _c;
-                return ({
-                    name: (_a = block.meta) !== null && _a !== void 0 ? _a : block.content,
-                    value: block,
-                    checked: state.blocks.some((selectedBlock) => selectedBlock.content === block.content),
-                    disabled: ((_b = block.options) === null || _b === void 0 ? void 0 : _b.disabled)
-                        ? `(${(_c = block.options) === null || _c === void 0 ? void 0 : _c.disabled})`
-                        : false,
-                });
-            });
+            return matches.map((block) => ({
+                name: block.label,
+                value: block,
+                checked: state.blocks.some((selectedBlock) => selectedBlock.content === block.content),
+                disabled: block.disabled ? `(${block.disabled})` : false,
+            }));
         },
     });
     if (choice)
         state.blocks = choice;
 }
 async function inspectMenu() {
-    const choice = await multiSelect({
+    var _a, _b, _c;
+    // TODO: consider making this an "expand" menu
+    const thePreview = await multiSelect({
         message: "Inspect Blocks",
-        pageSize: 1,
-        options: state.blocks.map((block) => ({
-            name: `${block.meta}\n${block.content}\n----------\n`,
-            value: block,
-            checked: true,
-        })),
+        pageSize: 30,
+        multiple: false,
+        loop: true,
+        equals: (a, b) => (a === null || a === void 0 ? void 0 : a.content) === (b === null || b === void 0 ? void 0 : b.content),
+        options: (input) => {
+            let matches = state.blocks;
+            if (input) {
+                const inputLower = input.toLowerCase();
+                matches = matches.filter((block) => block.meta.toLowerCase().includes(inputLower));
+            }
+            return [
+                { name: "<- BACK <-", value: null },
+                new Separator(),
+                ...matches.map((block) => ({
+                    name: block.label,
+                    value: block,
+                })),
+                new Separator(),
+            ];
+        },
     });
-    if (choice)
-        state.blocks = choice;
-}
-async function makeDotfilesMenu() { }
-async function preExitMenu() {
-    if (await confirm({ message: "Continue?" })) {
-        // TODO: create a .dotfiles-md cache file
-        process.exit(0);
+    if (thePreview) {
+        // [sourceFile] symlink(ini) -> .gitignore
+        console.log(colors.underline(`${colors.green(thePreview.source)} | ${(_a = thePreview.options) === null || _a === void 0 ? void 0 : _a.action}(${thePreview.lang}) -> ${(_c = (_b = thePreview.options) === null || _b === void 0 ? void 0 : _b.targetPath) !== null && _c !== void 0 ? _c : ""}`));
+        console.log(`${thePreview.content}\n`);
+        const keep = await confirm({
+            message: "Include this block?",
+        });
+        if (!keep) {
+            state.blocks = state.blocks.filter((someBlock) => someBlock.content !== thePreview.content);
+        }
+        // return to the inspection menu
+        await inspectMenu();
     }
-    console.log("\n...resuming");
+}
+async function makeDotfilesMenu() {
+    console.log("...coming soon!");
+    cache.set(state);
+    console.log("state saved! returning in 2s");
+    await sleep(2000);
+}
+async function clearCacheMenu() {
+    if (await confirm({ message: "are you sure?" })) {
+        cache.remove();
+    }
+}
+async function preExitMenu() {
+    if (await confirm({ message: "Save current settings?" })) {
+        // TODO: create a .dotfiles-md cache file
+        cache.set(state);
+        console.log(`saved to ${cache.path}`);
+    }
+    process.exit(0);
 }

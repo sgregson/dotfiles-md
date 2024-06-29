@@ -2,7 +2,9 @@ import * as dotenv from "dotenv";
 import { promises as fsPromises } from "fs";
 import os from "os";
 import fs from "fs-extra";
+
 import path from "path";
+import parseSentence from "minimist-string";
 import glob from "glob";
 
 import colors from "colors/safe.js";
@@ -38,6 +40,8 @@ export interface Block {
   }>;
   // if the block is disabled via options flags
   disabled: string | false;
+  // derived label from title, meta or content
+  label: string;
 }
 
 export const toMdAST = await unified()
@@ -49,6 +53,16 @@ export const toMdAST = await unified()
     prefix: "%",
   });
 
+export const sleep = (ms: number) =>
+  new Promise((resolve) => setTimeout(resolve, ms));
+
+export const clearScreen = () => {
+  console.log("\u001b[2J\u001b[0;0H");
+};
+
+/*************
+ * File stuff
+ */
 export async function globAsync(pattern: string, options = {}) {
   return new Promise<string[]>((resolve, reject) => {
     glob(pattern, options, (err, matches) => {
@@ -58,8 +72,40 @@ export async function globAsync(pattern: string, options = {}) {
   });
 }
 
+export const existsSync = (thePath): string | false => {
+  if (fs.existsSync(thePath)) return thePath;
+  if (fs.existsSync(process.cwd() + thePath)) return process.cwd() + thePath;
+
+  return false;
+};
+
+export const cache = {
+  path: ".dotfiles-md-cache",
+  get() {
+    return JSON.parse(fs.readFileSync(this.path, { encoding: "utf-8" }));
+  },
+  set(state: object) {
+    fs.writeFileSync(this.path, JSON.stringify(state), { encoding: "utf-8" });
+  },
+  remove() {
+    fs.unlinkSync(this.path);
+  },
+};
+
+/***************
+ * Blocks
+ */
 const homeDirectory = os.homedir();
-export async function getRunnableBlocks(inputFiles: string[]) {
+
+interface RunnableOptions {
+  // whether to return disabled elements (or omit them)
+  includeDisabled: boolean;
+}
+
+export async function getRunnableBlocks(
+  inputFiles: string[],
+  options: RunnableOptions
+) {
   let blocks: Block[] = [];
 
   for (const filePath of inputFiles) {
@@ -70,33 +116,53 @@ export async function getRunnableBlocks(inputFiles: string[]) {
       theDoc.children
         .filter(({ type }) => type === "code")
         .map(({ lang, meta, value }) => {
-          const options = meta?.split(" ") ?? [];
+          const options: Block["options"] = Object.fromEntries(
+            // minimist parses unknown args into an unknown "_" key
+            // and all args we have are technically unknown
+            parseSentence(meta ?? "")["_"].map((opt) => {
+              if (!opt.includes("=")) {
+                // the only option missing a "=" is the filePath
+                return [
+                  "targetPath",
+                  opt.replace(/^(~|\$HOME)(?=$|\/|\\)/, homeDirectory),
+                ];
+              }
 
-          let block: Block = {
+              return opt.split("=");
+            })
+          );
+
+          let label = "";
+          // prettier-ignore
+          switch (options?.action) {
+            case "run":
+              label = `${options?.title ?? meta} ${colors.red(options?.action??"")}:${lang}`;
+              break;
+            case "build":
+            case "symlink":
+            default:
+              label = `${options?.title ?? meta} ${colors.green(options?.action??"")}:${colors.underline(lang)} to ${options?.targetPath}`;
+          }
+
+          const theBlock: Block = {
             lang,
             meta,
-            options: Object.fromEntries(
-              options
-                .filter((opt) => opt.includes("="))
-                .map((opt) => {
-                  // the only option missing a "=" is the filePath
-                  if (!opt.includes("="))
-                    return [
-                      "targetPath",
-                      opt.replace(/^(~|\$HOME)(?=$|\/|\\)/, homeDirectory),
-                    ];
-
-                  return opt.split("=");
-                })
-            ),
+            options,
             content: value,
             source: filePath,
-            disabled: false,
+            disabled: isDisabled(options),
+            label,
           };
-          block.disabled = isDisabled(block);
-          return block;
+
+          return theBlock;
         })
-        .filter((block) => !!block.options?.action)
+        .filter(
+          (block) =>
+            // has an action
+            !!block.options?.action &&
+            // disabled while including disabled
+            (!block.disabled || options.includeDisabled)
+        )
     );
   }
   return blocks;
@@ -105,15 +171,12 @@ export async function getRunnableBlocks(inputFiles: string[]) {
 /**
  * Check whether the block should be permitted to run, commonly:
  * disabled=true, when=os.darwin, when=os.win32
- *
- * @param {obj} thisBlock the object representing the markdown codeblock
- * @returns string | false (string values are rendered in the UI)
  */
-function isDisabled(thisBlock: Block) {
+function isDisabled(options: Block["options"]) {
   // returns false or a string for a reason
-  if (thisBlock.options?.disabled) return colors.red("disabled=true");
-  if (thisBlock.options?.when) {
-    switch (thisBlock.options.when) {
+  if (options?.disabled) return colors.red("disabled=true");
+  if (options?.when) {
+    switch (options.when) {
       case "os.darwin":
         return os.platform() !== "darwin"
           ? colors.yellow("when!=os.darwin")

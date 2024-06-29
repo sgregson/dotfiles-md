@@ -51,6 +51,7 @@
     "glob": "^8.0.3",
     "inquirer": "^9.1.4",
     "inquirer-select-pro": "^1.0.0-alpha.6",
+    "minimist-string": "^1.0.2",
     "remark-frontmatter": "^4.0.1",
     "remark-gfm": "^3.0.1",
     "remark-parse": "^10.0.1",

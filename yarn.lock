@@ -2556,10 +2556,21 @@ minimatch@^9.0.0:
   dependencies:
     brace-expansion "^2.0.1"
 
+minimist-string@^1.0.2:
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/minimist-string/-/minimist-string-1.0.2.tgz#918b67b00cecfb438221421bbadd6decfba349cf"
+  integrity sha512-I9c7BMjapcd1gGlWkj1MvSxd4TgYT33Wd/L6ezSOhhj5DjD7NP6R2LTCj6kdV8MXh+w3tFazgvaIiO2hrCsscQ==
+  dependencies:
+    minimist "https://github.com/aredridel/minimist.git#91d831555bb2361d6a1c9aeae26dd86a8eab0f03"
+
 minimist@^1.2.0:
   version "1.2.8"
   resolved "https://registry.yarnpkg.com/minimist/-/minimist-1.2.8.tgz#c1a464e7693302e082a075cee0c057741ac4772c"
   integrity sha512-2yyAR8qBkN3YuheJanUpWC5U3bb5osDywNB8RzDVlDwDHbocAJveqqj1u8+SVD7jkWT4yvsHCpWqqWqAxb0zCA==
+
+"minimist@git+https://github.com/aredridel/minimist.git#91d831555bb2361d6a1c9aeae26dd86a8eab0f03":
+  version "1.2.0"
+  resolved "git+https://github.com/aredridel/minimist.git#91d831555bb2361d6a1c9aeae26dd86a8eab0f03"
 
 mri@^1.1.0:
   version "1.2.0"

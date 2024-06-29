@@ -3,6 +3,7 @@ import { promises as fsPromises } from "fs";
 import os from "os";
 import fs from "fs-extra";
 import path from "path";
+import parseSentence from "minimist-string";
 import glob from "glob";
 import colors from "colors/safe.js";
 import { unified } from "unified";
@@ -22,6 +23,13 @@ export const toMdAST = await unified()
     replacements: Object.assign(Object.assign({}, env), { PLACEHOLDER: "derpy-do" }),
     prefix: "%",
 });
+export const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+export const clearScreen = () => {
+    console.log("\u001b[2J\u001b[0;0H");
+};
+/*************
+ * File stuff
+ */
 export async function globAsync(pattern, options = {}) {
     return new Promise((resolve, reject) => {
         glob(pattern, options, (err, matches) => {
@@ -31,8 +39,30 @@ export async function globAsync(pattern, options = {}) {
         });
     });
 }
+export const existsSync = (thePath) => {
+    if (fs.existsSync(thePath))
+        return thePath;
+    if (fs.existsSync(process.cwd() + thePath))
+        return process.cwd() + thePath;
+    return false;
+};
+export const cache = {
+    path: ".dotfiles-md-cache",
+    get() {
+        return JSON.parse(fs.readFileSync(this.path, { encoding: "utf-8" }));
+    },
+    set(state) {
+        fs.writeFileSync(this.path, JSON.stringify(state), { encoding: "utf-8" });
+    },
+    remove() {
+        fs.unlinkSync(this.path);
+    },
+};
+/***************
+ * Blocks
+ */
 const homeDirectory = os.homedir();
-export async function getRunnableBlocks(inputFiles) {
+export async function getRunnableBlocks(inputFiles, options) {
     let blocks = [];
     for (const filePath of inputFiles) {
         const fileContent = await fs.readFile(filePath);
@@ -40,47 +70,62 @@ export async function getRunnableBlocks(inputFiles) {
         blocks = blocks.concat(theDoc.children
             .filter(({ type }) => type === "code")
             .map(({ lang, meta, value }) => {
-            var _a;
-            const options = (_a = meta === null || meta === void 0 ? void 0 : meta.split(" ")) !== null && _a !== void 0 ? _a : [];
-            let block = {
+            var _a, _b, _c, _d;
+            const options = Object.fromEntries(
+            // minimist parses unknown args into an unknown "_" key
+            // and all args we have are technically unknown
+            parseSentence(meta !== null && meta !== void 0 ? meta : "")["_"].map((opt) => {
+                if (!opt.includes("=")) {
+                    // the only option missing a "=" is the filePath
+                    return [
+                        "targetPath",
+                        opt.replace(/^(~|\$HOME)(?=$|\/|\\)/, homeDirectory),
+                    ];
+                }
+                return opt.split("=");
+            }));
+            let label = "";
+            // prettier-ignore
+            switch (options === null || options === void 0 ? void 0 : options.action) {
+                case "run":
+                    label = `${(_a = options === null || options === void 0 ? void 0 : options.title) !== null && _a !== void 0 ? _a : meta} ${colors.red((_b = options === null || options === void 0 ? void 0 : options.action) !== null && _b !== void 0 ? _b : "")}:${lang}`;
+                    break;
+                case "build":
+                case "symlink":
+                default:
+                    label = `${(_c = options === null || options === void 0 ? void 0 : options.title) !== null && _c !== void 0 ? _c : meta} ${colors.green((_d = options === null || options === void 0 ? void 0 : options.action) !== null && _d !== void 0 ? _d : "")}:${colors.underline(lang)} to ${options === null || options === void 0 ? void 0 : options.targetPath}`;
+            }
+            const theBlock = {
                 lang,
                 meta,
-                options: Object.fromEntries(options
-                    .filter((opt) => opt.includes("="))
-                    .map((opt) => {
-                    // the only option missing a "=" is the filePath
-                    if (!opt.includes("="))
-                        return [
-                            "targetPath",
-                            opt.replace(/^(~|\$HOME)(?=$|\/|\\)/, homeDirectory),
-                        ];
-                    return opt.split("=");
-                })),
+                options,
                 content: value,
                 source: filePath,
-                disabled: false,
+                disabled: isDisabled(options),
+                label,
             };
-            block.disabled = isDisabled(block);
-            return block;
+            return theBlock;
         })
-            .filter((block) => { var _a; return !!((_a = block.options) === null || _a === void 0 ? void 0 : _a.action); }));
+            .filter((block) => {
+            var _a;
+            // has an action
+            return !!((_a = block.options) === null || _a === void 0 ? void 0 : _a.action) &&
+                // disabled while including disabled
+                (!block.disabled || options.includeDisabled);
+        }));
     }
     return blocks;
 }
 /**
  * Check whether the block should be permitted to run, commonly:
  * disabled=true, when=os.darwin, when=os.win32
- *
- * @param {obj} thisBlock the object representing the markdown codeblock
- * @returns string | false (string values are rendered in the UI)
  */
-function isDisabled(thisBlock) {
-    var _a, _b;
+function isDisabled(options) {
     // returns false or a string for a reason
-    if ((_a = thisBlock.options) === null || _a === void 0 ? void 0 : _a.disabled)
+    if (options === null || options === void 0 ? void 0 : options.disabled)
         return colors.red("disabled=true");
-    if ((_b = thisBlock.options) === null || _b === void 0 ? void 0 : _b.when) {
-        switch (thisBlock.options.when) {
+    if (options === null || options === void 0 ? void 0 : options.when) {
+        switch (options.when) {
             case "os.darwin":
                 return os.platform() !== "darwin"
                     ? colors.yellow("when!=os.darwin")

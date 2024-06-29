@@ -42,7 +42,7 @@ _sometimes you don't want to run a code block_
 ### Build Actions
 The basic build action converts codeblocks to files:
 
-```md build/readme-built.md action=build title=demo-action-build
+```md build/readme-built.md action=build title="Demo: build action"
 > source: README.md, code block #2
 
 How cool is this?
@@ -55,13 +55,13 @@ How cool is this?
 
 The `action=symlink` file will convert codeblocks to a file in `/build/*` and symlink it to the specified location. Naturally, you can use the home directory reference in the file destination: `md ~/demo-symlink.md action=symlink`
 
-```md build/readme-symlink.md action=symlink title=demo-action-symlink(local)
+```md build/readme-symlink.md action=symlink title="Demo: symlink action (local)"
 > source: README.md, code block #3
 ```
 
 This example creates a file in your home directory `~/global-symlink.md` symlinked to `../build/#-global-symlink.md`
 
-```md $HOME/global-symlink.md action=symlink title=action-symlink(WARNING:global)
+```md $HOME/global-symlink.md action=symlink title="Demo: symlink action (GLOBAL)"
 Hello world!
 ```
 
