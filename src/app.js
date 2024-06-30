@@ -1,5 +1,6 @@
 import { confirm, select, Separator } from "@inquirer/prompts";
-import { globAsync, getRunnableBlocks, existsSync, cache, clearScreen, sleep, } from "./api.js";
+import { globAsync, getRunnableBlocks, existsSync, cache, clearScreen, sleep, executeBlock, } from "./api.js";
+import { join } from "path";
 import { select as multiSelect } from "inquirer-select-pro";
 import colors from "colors/safe.js";
 let state = {
@@ -51,6 +52,7 @@ else if (existsSync(cache.path)) {
                 description: "inspect the blocks before you add them to your system",
                 disabled: state.blocks.length === 0,
             },
+            new Separator(),
             {
                 name: "Make Dotfile",
                 value: "makeDotfiles",
@@ -94,15 +96,15 @@ async function pickFilesMenu() {
         loop: true,
         defaultValue: state.files,
         options: async (input) => {
-            let matches = await globAsync(state.filter, {
-                ignore: "node_modules/**",
+            let matches = await globAsync(join(process.cwd(), state.filter), {
+                ignore: "**/node_modules/**",
             });
             if (input) {
                 const inputLower = input.toLowerCase();
                 matches = matches.filter((path) => path.toLowerCase().includes(inputLower));
             }
             return matches.map((path) => ({
-                name: path,
+                name: path.replace(process.cwd(), "."),
                 value: path,
             }));
         },
@@ -179,10 +181,22 @@ async function inspectMenu() {
     }
 }
 async function makeDotfilesMenu() {
-    console.log("...coming soon!");
+    if (await confirm({ message: `Execute all ${state.blocks.length} blocks?` })) {
+        await Promise.all(state.blocks.map(executeBlock));
+    }
+    else {
+        console.log("Maybe inspect individual blocks");
+    }
     cache.set(state);
-    console.log("state saved! returning in 2s");
-    await sleep(2000);
+    await sleep(300);
+    process.stdout.write(".");
+    await sleep(300);
+    process.stdout.write(".");
+    await sleep(300);
+    process.stdout.write(".");
+    await sleep(300);
+    process.stdout.write(".");
+    await sleep(300);
 }
 async function clearCacheMenu() {
     if (await confirm({ message: "are you sure?" })) {
