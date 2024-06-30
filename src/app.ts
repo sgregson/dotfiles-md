@@ -51,11 +51,7 @@ export async function Run(status: AppStatus, yargs: Yargs = {}) {
       state.blocks = await getRunnableBlocks(state.files, {
         includeDisabled: false,
       });
-      state.totalBlocks = (
-        await getRunnableBlocks(state.files, {
-          includeDisabled: true,
-        })
-      )?.length;
+      await setTotalBlocks();
 
       await makeDotfilesMenu(yargs);
     }
@@ -79,12 +75,6 @@ export async function Run(status: AppStatus, yargs: Yargs = {}) {
   }
 }
 
-function getStatus() {
-  return `${state.blocks.length}${
-    state.totalBlocks ? ` of ${state.totalBlocks}` : ""
-  } blocks from ${state.files.length} files`;
-}
-
 /**
  * MAIN MENU
  * 1. source files
@@ -94,12 +84,7 @@ function getStatus() {
  */
 async function Main() {
   const hasSettings = existsSync(cache.path);
-
-  state.totalBlocks = (
-    await getRunnableBlocks(state.files, {
-      includeDisabled: true,
-    })
-  )?.length;
+  await setTotalBlocks();
 
   console.log(`Selected: ${getStatus()}`);
 
@@ -172,6 +157,37 @@ async function Main() {
 
   return choice;
 }
+
+// Utilities
+async function setTotalBlocks() {
+  state.totalBlocks = (
+    await getRunnableBlocks(state.files, {
+      includeDisabled: true,
+    })
+  ).reduce(
+    (acc, el) => {
+      if (el.disabled) {
+        acc.disabled++;
+      } else {
+        acc.active++;
+      }
+      acc.total++;
+      return acc;
+    },
+    { active: 0, disabled: 0, total: 0 }
+  );
+}
+function getStatus() {
+  return `${state.blocks.length}${
+    state.totalBlocks && state.files.length
+      ? ` of ${state.totalBlocks.total} blocks (${colors.green("✔")}${
+          state.totalBlocks.active
+        }, ${colors.red("𝘅")}${state.totalBlocks.disabled})`
+      : " blocks"
+  } from ${state.files.length} files`;
+}
+
+// SUB MENUS
 
 async function pickFilesMenu() {
   const choice = await multiSelect({
