@@ -22,14 +22,19 @@ if (process.env.DOTFILE) {
 else if (existsSync(cache.path)) {
     await loadSettingsMenu();
 }
-// Run the app!
+// Run the app! Loops until we run the exit menu
 (async function name(status) {
     while (status !== "exit") {
         status = await Main();
     }
 })("init");
-///////////////////////
-// Menus
+/**
+ * MAIN MENU
+ * 1. source files
+ * 2. source blocks from those files
+ * 3. (optional) inspect the content of the blocks
+ * 4. build the dotfiles
+ */
 async function Main() {
     var _a;
     // Clear screen every main() cycle
