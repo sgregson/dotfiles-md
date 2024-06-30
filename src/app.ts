@@ -312,7 +312,10 @@ async function makeDotfilesMenu(yargs: Yargs = {}) {
   if (isAuto || (await confirm({ message: `Build ${getStatus()}?` }))) {
     console.log(`Building ${getStatus()}:`);
     const now = new Date().toISOString();
-    await Promise.all(state.blocks.map(executeBlock(now)));
+
+    for (const [i, block] of Object.entries(state.blocks)) {
+      await executeBlock(now)(block, i);
+    }
 
     if (isAuto || (await confirm({ message: "exit?" }))) process.exit(0);
   } else {

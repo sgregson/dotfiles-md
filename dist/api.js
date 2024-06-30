@@ -2,6 +2,8 @@ import * as dotenv from "dotenv";
 import { promises as fsPromises } from "fs";
 import os from "os";
 import fs from "fs-extra";
+import { execa } from "execa";
+import tempWrite from "temp-write";
 import path from "path";
 import parseSentence from "minimist-string";
 import glob from "glob";
@@ -11,10 +13,17 @@ import remarkParse from "remark-parse";
 import remarkFrontmatter from "remark-frontmatter";
 import remarkGfm from "remark-gfm";
 import remarkFindReplace from "./remarkFindReplace.js";
+import { confirm } from "@inquirer/prompts";
 const env = dotenv.parse(await fsPromises
     .readFile(path.resolve(process.cwd(), ".env"))
     // if file's missing, return nothing
     .catch(() => ""));
+const interpreterMap = {
+    sh: "sh",
+    bash: "bash",
+    zsh: "zsh",
+    js: "node",
+};
 export const toMdAST = await unified()
     .use(remarkParse)
     .use(remarkFrontmatter)
@@ -88,7 +97,7 @@ export async function getRunnableBlocks(inputFiles, options) {
             // prettier-ignore
             switch (options === null || options === void 0 ? void 0 : options.action) {
                 case "run":
-                    label = `${(_a = options === null || options === void 0 ? void 0 : options.title) !== null && _a !== void 0 ? _a : meta} ${colors.red((_b = options === null || options === void 0 ? void 0 : options.action) !== null && _b !== void 0 ? _b : "")}:${lang}`;
+                    label = `${(_a = options === null || options === void 0 ? void 0 : options.title) !== null && _a !== void 0 ? _a : meta} ${colors.blue((_b = options === null || options === void 0 ? void 0 : options.action) !== null && _b !== void 0 ? _b : "")}:${lang}`;
                     break;
                 case "build":
                 case "symlink":
@@ -154,50 +163,67 @@ export const executeBlock = (now) => async (block, i) => {
             async (_error) => {
                 console.log("BUILD FAIL");
                 // backup & move old version
-                await fs.move(buildFile, buildFile + `.bak-${Date.now()}`);
+                await fs.move(buildFile, buildFile + `.bak-${now}`);
                 await fs.writeFile(buildFile, content);
             });
             // 2. create a symlink at the targetfile location back to the source file
             // prettier-ignore
             const successMsg = `🔗 linked ${targetFile} to ${path.relative(process.cwd(), buildFile)}`;
             // prettier-ignore
-            const backupMsg = `💾 backup created at ${targetFile + `.bak-${Date.now()}`}`;
-            await fs.ensureSymlink(buildFile, targetFile).then(() => console.log(successMsg), async (error) => {
+            const backupMsg = `💾 backup created at ${targetFile + `.bak-${now}`}`;
+            await fs.ensureSymlink(buildFile, targetFile).then(() => console.log(successMsg), async (_error) => {
                 // backup & move old version
-                if (error.code === "EEXIST") {
-                    const { oldContent, oldFile } = await fs
-                        .readlink(targetFile, {
-                        encoding: "utf8",
-                    })
-                        .then(async (linkString) => {
-                        return {
-                            oldContent: await fs.readFileSync(linkString, {
-                                encoding: "utf8",
-                            }),
-                            oldFile: linkString,
-                        };
-                    });
-                    // if the content differs, flatten the symlink and back it up before removing
-                    if ((await fs.readFile(buildFile, {
+                await console.log("DERP");
+                const oldFile = await fs.readlink(targetFile, {
+                    encoding: "utf8",
+                });
+                const oldContent = await fs
+                    .readFile(oldFile, {
+                    encoding: "utf8",
+                })
+                    .catch((_err) => console.log("failed to read old content"));
+                // if the content differs, flatten the symlink and back it up before removing
+                if (oldContent &&
+                    (await fs.readFile(buildFile, {
                         encoding: "utf8",
                     })) !== oldContent) {
-                        await fs
-                            .writeFile(targetFile + `.bak-${Date.now()}`, oldContent, {
-                            encoding: "utf8",
-                        })
-                            .then(() => console.log(backupMsg))
-                            .catch((err) => console.log(`🚧 failed to write ${targetFile} backup (${err.code}). Refer to old content at ${oldFile}`));
-                    }
-                    await fs.remove(targetFile);
                     await fs
-                        .ensureSymlink(buildFile, targetFile)
-                        .then(() => console.log(successMsg))
-                        .catch((err) => {
-                        console.log(`🚧 failed to create symlink at ${targetFile}`);
-                        console.log(err);
-                    });
+                        .writeFile(targetFile + `.bak-${now}`, oldContent, {
+                        encoding: "utf8",
+                    })
+                        .then(() => console.log(backupMsg))
+                        .catch((err) => console.log(`🚧 failed to write ${targetFile} backup (${err.code}). Refer to old content at ${oldFile}`));
                 }
+                await fs
+                    .remove(targetFile)
+                    .catch(() => `failed to remove old file ${targetFile}`);
+                await fs
+                    .ensureSymlink(buildFile, targetFile)
+                    .then(() => console.log(successMsg))
+                    .catch((err) => {
+                    console.log(`🚧 failed to create symlink at ${targetFile}`);
+                    console.log(err);
+                });
             });
+            break;
+        case "run":
+            if (!Object.keys(interpreterMap).includes(lang)) {
+                console.log(`😬 hang in there, I still have to learn how to ${options === null || options === void 0 ? void 0 : options.action} a '${lang}' block.`);
+                break;
+            }
+            // ALWAYS CHECK before executing scripts
+            console.log(colors.red(`\n> ${colors.underline(lang)}\n> `) +
+                block.content.split("\n").join("\n" + colors.red("> ")));
+            const confirmRun = await confirm({ message: "run the above script?" });
+            if (confirmRun) {
+                const tempFile = await tempWrite(block.content, "script.sh");
+                await execa `chmod +x ${tempFile}`;
+                await execa({
+                    stdout: "inherit",
+                    stderr: "inherit",
+                    reject: false,
+                }) `${interpreterMap[lang]} ${tempFile}`;
+            }
             break;
         default:
             console.log(`😬 hang in there, I still have to learn how to ${options === null || options === void 0 ? void 0 : options.action} a '${lang}' block.`);

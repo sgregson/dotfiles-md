@@ -46,6 +46,7 @@
     "colors": "^1.4.0",
     "dotenv": "^16.0.3",
     "escape-string-regexp": "^5.0.0",
+    "execa": "^9.3.0",
     "fs-extra": "^10.1.0",
     "glob": "^8.0.3",
     "inquirer": "^9.1.4",
@@ -54,6 +55,7 @@
     "remark-frontmatter": "^4.0.1",
     "remark-gfm": "^3.0.1",
     "remark-parse": "^10.0.1",
+    "temp-write": "^5.0.0",
     "unified": "^10.1.2",
     "unist-util-visit": "^4.1.1",
     "yargs": "^17.7.2"

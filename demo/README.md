@@ -2,11 +2,11 @@
 
 > A working demo of markdown-managed dotfiles.
 
-## About the Demo
+## Context
 
 ### Contents
 
-```md
+```md title="demo contents" disabled=true
 - `.env` (optional) set key-value pairs for replacement
 - `**/*.md` dotfiles stored as markdown
 ```
@@ -15,20 +15,14 @@
 
 The CLI builds `action=symlink` codeblocks to the current working directory (`${process.cwd()}/build/links`) and any `action=build` codeblocks missing a file target. For a basic non-interactive demo:
 
-```sh
+```sh title="demo usage" disabled=true
 # From the repo
 cd demo/
-# Run the tool non-interactively
-node ../cli.mjs run --pattern README.md --actions symlink,build
+# Run the tool (select this file and the blocks you want to view)
+npx dotfiles-md
 # Observe the resulting files
 ls -al ./build
 ```
-
-Which is the equivalent to an interactive CLI:
-
-1. `node ../cli.mjs`
-1. enter `config`, select `refresh`
-1. enter `run`, select `symlink` and `build`, and run the code blocks
 
 ## The Dotfiles
 > **tip**: View the raw markdown file to see the metadata on each codeblock
@@ -65,12 +59,32 @@ This example creates a file in your home directory `~/global-symlink.md` symlink
 Hello world!
 ```
 
-#### TODO: `action=run`
+### Run Actions
 
-The `action=run` flag will run the codeblock according to the appropriate interpreter (filePath is unused):
+The `action=run` flag will run the codeblock according to the appropriate interpreter. These code blocks do not use the `filePath` metadata.
 
-```sh action=run title=demo-action-run disabled=true
-echo "hello world";
+![run actions screenshot](./run_actions.png)
+
+#### Bash
+```bash title="run a bash script" action=run
+echo "Hello BASH";
+```
+
+#### Node
+```js title="run a node script" action=run
+console.log("Hello NODE!");
+```
+
+#### Shell
+
+```sh title="run a shell script" action=run
+echo "Hello SHELL"
+```
+
+#### ZSH
+
+```sh title="run a zsh script" action=run
+echo "Hello SHELL"
 ```
 
 ### TODO: replace with `./.env` matches

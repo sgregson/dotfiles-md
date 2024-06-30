@@ -2,6 +2,8 @@ import * as dotenv from "dotenv";
 import { promises as fsPromises } from "fs";
 import os from "os";
 import fs from "fs-extra";
+import { execa } from "execa";
+import tempWrite from "temp-write";
 
 import path from "path";
 import parseSentence from "minimist-string";
@@ -13,6 +15,7 @@ import remarkParse from "remark-parse";
 import remarkFrontmatter from "remark-frontmatter";
 import remarkGfm from "remark-gfm";
 import remarkFindReplace from "./remarkFindReplace.js";
+import { confirm } from "@inquirer/prompts";
 
 const env = dotenv.parse(
   await fsPromises
@@ -52,6 +55,13 @@ export interface Block {
   // derived label from title, meta or content
   label: string;
 }
+
+const interpreterMap = {
+  sh: "sh",
+  bash: "bash",
+  zsh: "zsh",
+  js: "node",
+};
 
 export const toMdAST = await unified()
   .use(remarkParse)
@@ -145,7 +155,7 @@ export async function getRunnableBlocks(
           // prettier-ignore
           switch (options?.action) {
             case "run":
-              label = `${options?.title ?? meta} ${colors.red(options?.action??"")}:${lang}`;
+              label = `${options?.title ?? meta} ${colors.blue(options?.action??"")}:${lang}`;
               break;
             case "build":
             case "symlink":
@@ -279,6 +289,30 @@ export const executeBlock = (now: string) => async (block: Block, i) => {
             });
         }
       );
+      break;
+    case "run":
+      if (!Object.keys(interpreterMap).includes(lang)) {
+        console.log(
+          `😬 hang in there, I still have to learn how to ${options?.action} a '${lang}' block.`
+        );
+        break;
+      }
+
+      // ALWAYS CHECK before executing scripts
+      console.log(
+        colors.red(`\n> ${colors.underline(lang)}\n> `) +
+          block.content.split("\n").join("\n" + colors.red("> "))
+      );
+      const confirmRun = await confirm({ message: "run the above script?" });
+      if (confirmRun) {
+        const tempFile = await tempWrite(block.content, "script.sh");
+        await execa`chmod +x ${tempFile}`;
+        await execa({
+          stdout: "inherit",
+          stderr: "inherit",
+          reject: false,
+        })`${interpreterMap[lang]} ${tempFile}`;
+      }
       break;
     default:
       console.log(

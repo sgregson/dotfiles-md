@@ -13,7 +13,6 @@ if (process.argv[1].endsWith("app.js")) {
     Run("init");
 }
 export async function Run(status, yargs = {}) {
-    var _a;
     if (yargs.dotfile) {
         // ONBOARDING 1: Load saved content from an individual dotfile
         let theFile = existsSync(yargs.dotfile);
@@ -27,9 +26,7 @@ export async function Run(status, yargs = {}) {
             state.blocks = await getRunnableBlocks(state.files, {
                 includeDisabled: false,
             });
-            state.totalBlocks = (_a = (await getRunnableBlocks(state.files, {
-                includeDisabled: true,
-            }))) === null || _a === void 0 ? void 0 : _a.length;
+            await setTotalBlocks();
             await makeDotfilesMenu(yargs);
         }
     }
@@ -52,9 +49,6 @@ export async function Run(status, yargs = {}) {
             clearScreen();
     }
 }
-function getStatus() {
-    return `${state.blocks.length}${state.totalBlocks ? ` of ${state.totalBlocks}` : ""} blocks from ${state.files.length} files`;
-}
 /**
  * MAIN MENU
  * 1. source files
@@ -63,11 +57,8 @@ function getStatus() {
  * 4. build the dotfiles
  */
 async function Main() {
-    var _a;
     const hasSettings = existsSync(cache.path);
-    state.totalBlocks = (_a = (await getRunnableBlocks(state.files, {
-        includeDisabled: true,
-    }))) === null || _a === void 0 ? void 0 : _a.length;
+    await setTotalBlocks();
     console.log(`Selected: ${getStatus()}`);
     const choice = await select({
         message: "Main Menu",
@@ -134,6 +125,27 @@ async function Main() {
     }
     return choice;
 }
+// Utilities
+async function setTotalBlocks() {
+    state.totalBlocks = (await getRunnableBlocks(state.files, {
+        includeDisabled: true,
+    })).reduce((acc, el) => {
+        if (el.disabled) {
+            acc.disabled++;
+        }
+        else {
+            acc.active++;
+        }
+        acc.total++;
+        return acc;
+    }, { active: 0, disabled: 0, total: 0 });
+}
+function getStatus() {
+    return `${state.blocks.length}${state.totalBlocks && state.files.length
+        ? ` of ${state.totalBlocks.total} blocks (${colors.green("✔")}${state.totalBlocks.active}, ${colors.red("𝘅")}${state.totalBlocks.disabled})`
+        : " blocks"} from ${state.files.length} files`;
+}
+// SUB MENUS
 async function pickFilesMenu() {
     const choice = await multiSelect({
         message: "Source Files",
@@ -229,7 +241,9 @@ async function makeDotfilesMenu(yargs = {}) {
     if (isAuto || (await confirm({ message: `Build ${getStatus()}?` }))) {
         console.log(`Building ${getStatus()}:`);
         const now = new Date().toISOString();
-        await Promise.all(state.blocks.map(executeBlock(now)));
+        for (const [i, block] of Object.entries(state.blocks)) {
+            await executeBlock(now)(block, i);
+        }
         if (isAuto || (await confirm({ message: "exit?" })))
             process.exit(0);
     }

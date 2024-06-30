@@ -73,7 +73,6 @@ The **`[...options]` array** is a space-delimited list of `key=value` directives
   - `=build`: build the file to `[filePath]`, replacing content as appropriate
   - `=symlink`: find-replace patterns (`%...`) in the codeblock and symlink the result (from `/build`) to `[filePath]`
   - `=run`: run this code block according to the file syntax (js: node, sh: bash, zsh)
-  - [ ] TODO: not implemented yet
 - `when` defines the availability of this codeblock
   - `=os.darwin`, `=os.win32`: platform-specific dotfiles
 - `disabled=true` prevent a block from being run (helpful for migrations)
@@ -96,18 +95,18 @@ cd dotfiles-md
 # Install dependencies
 yarn
 # Run the interactive CLI
-yarn start
+npx dotfiles-md --help
 ```
 
 ## Roadmap
 
 - [x] implement `when=<conditions>` (v0.3.0)
-- implement `action=run` for imperative settings (see [macos.md](dotfiles/macos/macos.md))
-- implement find-replace from `.env` files
+- [x] implement `action=run` (v0.4.6) for imperative settings (see [demo/README.md](demo/README.md))
+- [ ] implement find-replace from `.env` files
   - idea: command to find all replacement keys in dotfiles (create a `.env.schema` from MD contents) for use with `dotenv-extended`
-- Title codeblocks from nearest heading (To support spaces and use as fallback for missing `title=`)
-- Update & Improve Interface UI: 2-panel layout for navigation and show a codeblock
-- Generate diff when file exists
+- (idea) Title codeblocks from nearest heading (To support spaces and use as fallback for missing `title=`)
+- (idea) Update & Improve Interface UI: 2-panel layout for navigation and show a codeblock
+- (idea) Generate diff when file a exists instead of the current overwrite/backup flow
 
 ## FAQ
 
