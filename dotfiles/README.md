@@ -227,7 +227,7 @@ pinentry-program /opt/homebrew/bin/pinentry-mac
 From [pinentry-touchid](https://github.com/jorgelbg/pinentry-touchid) I don't want to save my passphrase in keychain:
 
 ```sh action=run title="Disable Save GPG To Keychain" disabled=true
-defaults write org.gpgtools.common DisableKeychain -bool yes
+defaults write org.gpgtools.common DisableKeychain -bool yes;
 ```
 
 
@@ -248,28 +248,24 @@ alias jfdi="pushd ~/Code/dotfiles-md/ && yarn jfdi && popd"
 
 ## Homebrew
 
-```sh action=run title=taps when=os.darwin
+```sh action=run title="Homebrew taps" when=os.darwin
 # brew tap buildkite/cli
-brew tap caskroom/fonts
-brew tap homebrew/bundle
-brew tap ikuwow/imgcat
-brew tap joeyhoer/extras
-brew tap mapbox/cli
-brew tap welldan97/whereami
+# brew tap caskroom/fonts;
+brew tap homebrew/bundle;
+brew tap ikuwow/imgcat;
+brew tap joeyhoer/extras;
+brew tap mapbox/cli;
+brew tap welldan97/whereami;
 ```
 
-```sh action=run title=install-all-nerd-fonts when=os.darwin
-brew install $( brew search font | grep nerd | tr '\n' ' ' )
-```
-
-```sh action=run title=formulas when=os.darwin
+```sh action=run title="Homebrew formulas" when=os.darwin
 brew install asdf;
 # brew install git
 brew install bk;
 brew install deno;
 brew install fzf;
 brew install gitleaks; #secret scanning for git repos
-brew install gh; # github CLI
+brew install gh;       # github CLI
 brew install imgcat;
 brew install jppoeyhoer/extras/gzthermal;
 brew install jq;
@@ -286,17 +282,13 @@ brew install whereami;
 brew install zsh-completions;
 ```
 
-```sh action=run title=casks when=os.darwin
+```sh action=run title="Homebrew casks" when=os.darwin
 brew install --cask 1password/tap/1password-cli;
 brew install --cask alfred;
-# brew install --cask bitbar;
 brew install --cask cleanshot;
-# brew install --cask cloudapp;
 brew install --cask daisydisk;
-# brew install --cask diffmerge;
 brew install --cask discord;
 brew install --cask dropbox;
-# brew install --cask evernotes
 brew install --cask firefox@developer-edition;
 brew install --cask fluid;
 brew install --cask flux;
@@ -304,20 +296,14 @@ brew install --cask font-fira-code;
 brew install --cask google-chrome;
 brew install --cask google-cloud-sdk;
 brew install --cask google-drive;
-brew install --cask hiddenbar; # collapsible macos menubar
-# brew install --cask iterm2-beta;
-# brew install --cask mattr-slate;
-# brew install --cask meld (replaced with vscode)
+# brew install --cask hiddenbar; # collapsible macos menubar
 brew install --cask numi;
 brew install --cask phoenix;
 brew install --cask processing;
 brew install --cask qlmarkdown
-# brew install --cask shady;
-# brew install --cask skitch;
 brew install --cask slack;
 brew install --cask spotify;
 # brew install --cask steam;
-# brew install --cask sublime-text-dev;
 # unnaturalscrollwheels is generally more reliable than scroll-reverser
 brew install --cask unnaturalscrollwheels; 
 brew install --cask visual-studio-code;
@@ -900,54 +886,54 @@ reloadTabs() {
 
 ## MacOS System Config
 
-```sh title=keyboard action=run
+```sh title="MacOS Key Repeat" action=run when=os.darwin
 # Disable press-and-hold for keys in favor of key repeat.
-defaults write -g ApplePressAndHoldEnabled -bool false
+defaults write -g ApplePressAndHoldEnabled -bool false;
 
 # Set a really fast key repeat.
-defaults write NSGlobalDomain KeyRepeat -int 1
+defaults write NSGlobalDomain KeyRepeat -int 1;
 ```
 
 ### Keyboard setup
 
-```sh title=Finder action=run
+```sh title=Finder action=run when=os.darwin
 # Use AirDrop over every interface. srsly this should be a default.
-defaults write com.apple.NetworkBrowser BrowseAllInterfaces 1
+defaults write com.apple.NetworkBrowser BrowseAllInterfaces 1;
 
 # Always open everything in Finder's list view. This is important.
-defaults write com.apple.Finder FXPreferredViewStyle Nlsv
+defaults write com.apple.Finder FXPreferredViewStyle Nlsv;
 
 # Show the ~/Library folder.
-chflags nohidden ~/Library
+chflags nohidden ~/Library;
 
 # Set the Finder prefs for showing a few different volumes on the Desktop.
-defaults write com.apple.finder ShowExternalHardDrivesOnDesktop -bool true
-defaults write com.apple.finder ShowRemovableMediaOnDesktop -bool true
+defaults write com.apple.finder ShowExternalHardDrivesOnDesktop -bool true;
+defaults write com.apple.finder ShowRemovableMediaOnDesktop -bool true;
 ```
 
-```sh title=hot-corners action=run
+```sh title=hot-corners action=run when=os.darwin
 # Run the screensaver if we're in the bottom-left hot corner.
-defaults write com.apple.dock wvous-bl-corner -int 5
-defaults write com.apple.dock wvous-bl-modifier -int 0
+defaults write com.apple.dock wvous-bl-corner -int 5;
+defaults write com.apple.dock wvous-bl-modifier -int 0;
 ```
 
 ### Safari browser defaults
 
-```sh title=safari-setup action=run
+```sh title=safari-setup action=run when=os.darwin
 # Hide Safari's bookmark bar.
-defaults write com.apple.Safari ShowFavoritesBar -bool false
+defaults write com.apple.Safari ShowFavoritesBar -bool false;
 
 # Set up Safari for development.
-defaults write com.apple.Safari IncludeInternalDebugMenu -bool true
-defaults write com.apple.Safari IncludeDevelopMenu -bool true
-defaults write com.apple.Safari WebKitDeveloperExtrasEnabledPreferenceKey -bool true
-defaults write com.apple.Safari "com.apple.Safari.ContentPageGroupIdentifier.WebKit2DeveloperExtrasEnabled" -bool true
-defaults write NSGlobalDomain WebKitDeveloperExtras -bool true
+defaults write com.apple.Safari IncludeInternalDebugMenu -bool true;
+defaults write com.apple.Safari IncludeDevelopMenu -bool true;
+defaults write com.apple.Safari WebKitDeveloperExtrasEnabledPreferenceKey -bool true;
+defaults write com.apple.Safari "com.apple.Safari.ContentPageGroupIdentifier.WebKit2DeveloperExtrasEnabled" -bool true;
+defaults write NSGlobalDomain WebKitDeveloperExtras -bool true;
 ```
 
 ### Phoenix JS Window Managment
 
-```js $HOME/.phoenix.js action=symlink title="Phoenix.js window config"
+```js $HOME/.phoenix.js action=symlink title="Phoenix.js window config" when=os.darwin
 /// <reference path="../../../types/phoenix.d.ts" />
 "use strict";
 /*globals Phoenix Window App Key Screen Space*/
