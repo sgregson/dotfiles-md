@@ -1,7 +1,19 @@
-![logo – an arrow from a glob of markdown to a glob of dotfiles](./docs/banner.png)
+![a logo illustrating an arrow from a glob of markdown to a glob of dotfiles](./docs/banner.png)
 
-<!-- Banner Image Source: <div style="width:100%;height:3em;font-size:3.6rem;font-weight:bold;background:linear-gradient(-0.075turn,#3f87a6,#ebf8e1,#f69d3c);color:white;text-shadow:1px 1px 3px black;display:grid;place-items:center;margin:2em 0"><div><code>*/.md</code> → <code>~/.*</code></div></div>
--->
+<details><summary><sup><sub>banner image source</sub></sup></summary>
+  
+  ```html title="logo" disable=true
+  <div style="height:3em;aspect-ratio: 6/1;font-size:3.6rem;font-weight:bold;background:linear-gradient(-0.075turn,#3f87a6,#ebf8e1,#f69d3c);color:white;text-shadow:1px 1px 3px black;display:grid;place-items:center;margin:2em 0">
+    <div>
+      <code style="background-color: rgba(0,0,0,.2);padding:.2em .5em;border-radius:.25em">*.md</code>
+      →
+      <code style="background-color: rgba(0,0,0,.2);padding:.2em .5em;border-radius:.25em">~/.*</code>
+    </div>
+  </div>
+  ```
+
+</details>
+
 
 [![GPLv3 License](https://img.shields.io/badge/License-GPL%20v3-yellow.svg)](https://opensource.org/licenses/)
 
