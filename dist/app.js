@@ -1,33 +1,47 @@
 import { confirm, select, Separator } from "@inquirer/prompts";
 import { globAsync, getRunnableBlocks, existsSync, cache, clearScreen, sleep, executeBlock, } from "./api.js";
-import { select as multiSelect } from "inquirer-select-pro";
+import { select as multiSelect, } from "inquirer-select-pro";
 import colors from "colors/safe.js";
 let state = {
     filter: "**/*.md",
     files: [],
     blocks: [],
+    totalBlocks: undefined,
 };
-// Init: clear the screen
-clearScreen();
-// Load saved content - either DOTFILE or .dotfile-md-cache
-if (process.env.DOTFILE) {
-    let theFile = existsSync(process.env.DOTFILE);
-    if (theFile && (await confirm({ message: `Use ${theFile}?` }))) {
-        state.files = [theFile];
-        state.blocks = await getRunnableBlocks(state.files, {
-            includeDisabled: false,
-        });
+(async function Run(status) {
+    var _a;
+    // Init: clear the screen
+    clearScreen();
+    // Load saved content from $DOTFILE or .dotfile-md-cache
+    if (process.env.DOTFILE) {
+        let theFile = existsSync(process.env.DOTFILE);
+        if (!theFile) {
+            console.log(`${process.env.DOTFILE} not found.`);
+            await sleep(500);
+        }
+        else {
+            console.log(`Found ${theFile}:`);
+            state.files = [theFile];
+            state.blocks = await getRunnableBlocks(state.files, {
+                includeDisabled: false,
+            });
+            state.totalBlocks = (_a = (await getRunnableBlocks(state.files, {
+                includeDisabled: true,
+            }))) === null || _a === void 0 ? void 0 : _a.length;
+            await makeDotfilesMenu();
+        }
     }
-}
-else if (existsSync(cache.path)) {
-    await loadSettingsMenu();
-}
-// Run the app! Loops until we run the exit menu
-(async function name(status) {
-    while (status !== "exit") {
+    else if (existsSync(cache.path)) {
+        await loadSettingsMenu();
+    }
+    // Run the app! Loops until we run the exit menu
+    while (status !== "[exit]") {
         status = await Main();
     }
 })("init");
+function getStatus() {
+    return `${state.blocks.length}${state.totalBlocks ? ` of ${state.totalBlocks}` : ""} blocks from ${state.files.length} files`;
+}
 /**
  * MAIN MENU
  * 1. source files
@@ -40,10 +54,10 @@ async function Main() {
     // Clear screen every main() cycle
     clearScreen();
     const hasSettings = existsSync(cache.path);
-    const allBlocks = (_a = (await getRunnableBlocks(state.files, {
-        includeDisabled: false,
+    state.totalBlocks = (_a = (await getRunnableBlocks(state.files, {
+        includeDisabled: true,
     }))) === null || _a === void 0 ? void 0 : _a.length;
-    console.log(`Selected: ${state.blocks.length}${allBlocks ? ` of ${allBlocks}` : ""} blocks from ${state.files.length} files`);
+    console.log(`Selected: ${getStatus()}`);
     const choice = await select({
         message: "Main Menu",
         pageSize: 10,
@@ -85,7 +99,7 @@ async function Main() {
                     ? "(select files or blocks)"
                     : false,
             },
-            { name: "[exit]", value: "exit" },
+            { value: "[exit]" },
         ],
     });
     switch (choice) {
@@ -104,7 +118,7 @@ async function Main() {
         case "manageCache":
             await manageCacheMenu();
             break;
-        case "exit":
+        case "[exit]":
             await preExitMenu();
     }
     return choice;
@@ -200,13 +214,14 @@ async function inspectMenu() {
     }
 }
 async function makeDotfilesMenu() {
-    if (await confirm({ message: `Execute all ${state.blocks.length} blocks?` })) {
+    if (await confirm({ message: `Build ${getStatus()}?` })) {
         await Promise.all(state.blocks.map(executeBlock));
-        await confirm({ message: "continue?" });
+        if (await confirm({ message: "exit?" }))
+            process.exit(0);
     }
     else {
         await sleep(500);
-        console.log("cancelled");
+        console.log("(cancelled)");
     }
 }
 async function manageCacheMenu() {
@@ -216,7 +231,7 @@ async function manageCacheMenu() {
     }
     const { blocks, files } = cache.get();
     let choices = [
-        { name: "[back]", value: null },
+        { value: "[back]" },
         {
             name: "Save Settings",
             value: "save",
@@ -228,8 +243,8 @@ async function manageCacheMenu() {
     ];
     if (existsSync(cache.path)) {
         choices = choices.concat([
-            { name: "Load Settings", value: "load", disabled: false },
-            { name: "Remove Settings", value: "remove", disabled: false },
+            { name: "Load Settings", value: "load" },
+            { name: "Remove Settings", value: "remove" },
         ]);
     }
     const choice = await select({
@@ -249,17 +264,17 @@ async function manageCacheMenu() {
     }
 }
 async function saveSettingsMenu() {
-    if (await confirm({ message: "Save current settings?" })) {
+    if (await confirm({ message: "Save selections for next time?" })) {
         cache.set(state);
         console.log(`saved to ${cache.path}`);
     }
 }
 async function loadSettingsMenu() {
-    if (await confirm({ message: "Load saved settings?" }))
+    if (await confirm({ message: "Load saved selections?" }))
         state = cache.get();
 }
 async function removeSettingsMenu() {
-    if (await confirm({ message: "are you sure?" }))
+    if (await confirm({ message: "Are you sure?" }))
         cache.remove();
 }
 async function preExitMenu() {

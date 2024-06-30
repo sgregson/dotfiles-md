@@ -28,6 +28,7 @@ export interface State {
   files: string[];
   // selected blocks
   blocks: Block[];
+  totalBlocks?: number;
 }
 export interface Block {
   // the markdown language signifier
