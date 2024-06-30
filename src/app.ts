@@ -39,7 +39,7 @@ if (process.argv[1].endsWith("app.js")) {
 
 export async function Run(status: AppStatus, yargs: Yargs = {}) {
   if (yargs.dotfile) {
-    // ONBOARDING 1: Load saved content from $DOTFILE or .dotfile-md-cache
+    // ONBOARDING 1: Load saved content from an individual dotfile
     let theFile = existsSync(yargs.dotfile);
 
     if (!theFile) {
@@ -59,13 +59,15 @@ export async function Run(status: AppStatus, yargs: Yargs = {}) {
 
       await makeDotfilesMenu(yargs);
     }
-  } else if (existsSync(cache.path)) {
-    // ONBOARDING 2. Load saved settings from cache
-    await loadSettingsMenu();
   } else {
-    // ONBOARDING 3. Standard onboarding
-    await pickFilesMenu();
-    await pickBlocksMenu();
+    if (existsSync(cache.path)) {
+      // ONBOARDING 2. Load saved settings from .dotfile-md-cache file
+      await loadSettingsMenu();
+    } else {
+      // ONBOARDING 3. Standard onboarding
+      await pickFilesMenu();
+      await pickBlocksMenu();
+    }
   }
 
   // Run the main loop! Loops until we run the exit menu
