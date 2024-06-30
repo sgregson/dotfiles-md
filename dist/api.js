@@ -148,7 +148,10 @@ export const executeBlock = (now) => async (block, i) => {
             await fs.ensureDir(path.dirname(buildFile));
             await fs.ensureDir(path.dirname(targetFile));
             // 1. build the source file and symlink it
-            await fs.writeFile(buildFile, content).then(() => console.log(`🔨 built ${path.relative(process.cwd(), buildFile)}`), async (_error) => {
+            await fs.writeFile(buildFile, content).catch(
+            // () =>
+            //   console.log(`🔨 built ${path.relative(process.cwd(), buildFile)}`),
+            async (_error) => {
                 console.log("BUILD FAIL");
                 // backup & move old version
                 await fs.move(buildFile, buildFile + `.bak-${Date.now()}`);
@@ -162,10 +165,30 @@ export const executeBlock = (now) => async (block, i) => {
             await fs.ensureSymlink(buildFile, targetFile).then(() => console.log(successMsg), async (error) => {
                 // backup & move old version
                 if (error.code === "EEXIST") {
-                    await fs
-                        .move(targetFile, targetFile + `.bak-${Date.now()}`)
-                        .then(() => console.log(backupMsg))
-                        .catch(() => { });
+                    const { oldContent, oldFile } = await fs
+                        .readlink(targetFile, {
+                        encoding: "utf8",
+                    })
+                        .then(async (linkString) => {
+                        return {
+                            oldContent: await fs.readFileSync(linkString, {
+                                encoding: "utf8",
+                            }),
+                            oldFile: linkString,
+                        };
+                    });
+                    // if the content differs, flatten the symlink and back it up before removing
+                    if ((await fs.readFile(buildFile, {
+                        encoding: "utf8",
+                    })) !== oldContent) {
+                        await fs
+                            .writeFile(targetFile + `.bak-${Date.now()}`, oldContent, {
+                            encoding: "utf8",
+                        })
+                            .then(() => console.log(backupMsg))
+                            .catch((err) => console.log(`🚧 failed to write ${targetFile} backup (${err.code}). Refer to old content at ${oldFile}`));
+                    }
+                    await fs.remove(targetFile);
                     await fs
                         .ensureSymlink(buildFile, targetFile)
                         .then(() => console.log(successMsg))
