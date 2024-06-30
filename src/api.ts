@@ -223,7 +223,7 @@ export const executeBlock = (now: string) => async (block: Block, i) => {
         async (_error) => {
           console.log("BUILD FAIL");
           // backup & move old version
-          await fs.move(buildFile, buildFile + `.bak-${Date.now()}`);
+          await fs.move(buildFile, buildFile + `.bak-${now}`);
           await fs.writeFile(buildFile, content);
         }
       );
@@ -232,52 +232,51 @@ export const executeBlock = (now: string) => async (block: Block, i) => {
       // prettier-ignore
       const successMsg = `🔗 linked ${targetFile} to ${path.relative(process.cwd(), buildFile)}`
       // prettier-ignore
-      const backupMsg = `💾 backup created at ${targetFile + `.bak-${Date.now()}`}`;
+      const backupMsg = `💾 backup created at ${targetFile + `.bak-${now}`}`;
       await fs.ensureSymlink(buildFile, targetFile).then(
         () => console.log(successMsg),
-        async (error) => {
+        async (_error) => {
           // backup & move old version
-          if (error.code === "EEXIST") {
-            const { oldContent, oldFile } = await fs
-              .readlink(targetFile, {
+          await console.log("DERP");
+          const oldFile = await fs.readlink(targetFile, {
+            encoding: "utf8",
+          });
+          const oldContent = await fs
+            .readFile(oldFile, {
+              encoding: "utf8",
+            })
+            .catch((_err) => console.log("failed to read old content"));
+
+          // if the content differs, flatten the symlink and back it up before removing
+          if (
+            oldContent &&
+            (await fs.readFile(buildFile, {
+              encoding: "utf8",
+            })) !== oldContent
+          ) {
+            await fs
+              .writeFile(targetFile + `.bak-${now}`, oldContent, {
                 encoding: "utf8",
               })
-              .then(async (linkString) => {
-                return {
-                  oldContent: await fs.readFileSync(linkString, {
-                    encoding: "utf8",
-                  }),
-                  oldFile: linkString,
-                };
-              });
-
-            // if the content differs, flatten the symlink and back it up before removing
-            if (
-              (await fs.readFile(buildFile, {
-                encoding: "utf8",
-              })) !== oldContent
-            ) {
-              await fs
-                .writeFile(targetFile + `.bak-${Date.now()}`, oldContent, {
-                  encoding: "utf8",
-                })
-                .then(() => console.log(backupMsg))
-                .catch((err) =>
-                  console.log(
-                    `🚧 failed to write ${targetFile} backup (${err.code}). Refer to old content at ${oldFile}`
-                  )
-                );
-            }
-
-            await fs.remove(targetFile);
-            await fs
-              .ensureSymlink(buildFile, targetFile)
-              .then(() => console.log(successMsg))
-              .catch((err) => {
-                console.log(`🚧 failed to create symlink at ${targetFile}`);
-                console.log(err);
-              });
+              .then(() => console.log(backupMsg))
+              .catch((err) =>
+                console.log(
+                  `🚧 failed to write ${targetFile} backup (${err.code}). Refer to old content at ${oldFile}`
+                )
+              );
           }
+
+          await fs
+            .remove(targetFile)
+            .catch(() => `failed to remove old file ${targetFile}`);
+
+          await fs
+            .ensureSymlink(buildFile, targetFile)
+            .then(() => console.log(successMsg))
+            .catch((err) => {
+              console.log(`🚧 failed to create symlink at ${targetFile}`);
+              console.log(err);
+            });
         }
       );
       break;
