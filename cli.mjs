@@ -4,12 +4,14 @@ import { Run } from "./dist/app.js";
 import yargs from "yargs";
 import { hideBin } from "yargs/helpers";
 
-var argv = yargs(hideBin(process.argv))
-  .usage("Usage: $0 [dotfile]")
-  .example("$0", "run the app")
-  .alias("f", "file")
-  .describe("f", "Load a single markdown file")
-  // .demandOption(["f"])
+const args = yargs(hideBin(process.argv))
+  .usage("Usage: $0 [options] [dotfile]")
+  .example("$0", "interactively run the app")
+  .alias("d", "dotfile")
+  .describe("d", "Load dotfiles from a single markdown file")
+  .boolean("auto")
+  .describe("auto", "Auto-accept the provided file")
+  .example("$0 --auto README.md", "create every enabled dotfile in README.md")
   .help("h")
   .alias("h", "help")
   .version(false)
@@ -17,6 +19,6 @@ var argv = yargs(hideBin(process.argv))
   .parse();
 
 // read explicit --file="" or implicit npx dotfiles-md SOMEFILE.md
-process.env.DOTFILE = process.env.DOTFILE ?? argv.dotfile ?? argv._[0];
+args.dotfile = args.dotfile ?? args._[0];
 
-Run("init");
+Run("init", args);

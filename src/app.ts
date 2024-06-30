@@ -28,6 +28,8 @@ type AppStatus =
   | "manageCache"
   | "[exit]";
 
+type Yargs = { [key: string]: unknown };
+
 let state: State = {
   filter: "**/*.md",
   files: [],
@@ -40,7 +42,7 @@ if (process.argv[1].endsWith("app.js")) {
   Run("init");
 }
 
-export async function Run(status: AppStatus) {
+export async function Run(status: AppStatus, yargs: Yargs = {}) {
   // Init: clear the screen
   clearScreen();
 
@@ -63,7 +65,7 @@ export async function Run(status: AppStatus) {
         })
       )?.length;
 
-      await makeDotfilesMenu();
+      await makeDotfilesMenu(yargs);
     }
   } else if (existsSync(cache.path)) {
     await loadSettingsMenu();
@@ -290,8 +292,11 @@ async function inspectMenu() {
   }
 }
 
-async function makeDotfilesMenu() {
-  if (await confirm({ message: `Build ${getStatus()}?` })) {
+async function makeDotfilesMenu(yargs: Yargs = {}) {
+  if (
+    (yargs?.dotfile && yargs?.auto) ||
+    (await confirm({ message: `Build ${getStatus()}?` }))
+  ) {
     await Promise.all(state.blocks.map(executeBlock));
 
     if (await confirm({ message: "exit?" })) process.exit(0);

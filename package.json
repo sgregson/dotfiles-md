@@ -24,14 +24,12 @@
     "darwin"
   ],
   "scripts": {
-    "prerelease": "yarn tsc",
     "release": "np",
     "prejfdi": "yarn",
-    "jfdi": "cd dotfiles; node ../cli.mjs run -- --pattern \"**/*.md\" --actions symlink,build; cd -",
+    "jfdi": "cd dotfiles; npx .. --auto README.md; cd -",
     "app": "node ./src/app.js",
-    "doit": "cd dotfiles; node ../cli.mjs run -- --pattern \"**/*.md\" --actions symlink,build; cd -",
     "start": "node ./cli.mjs",
-    "test": "echo \"STATUS: no test specified\"",
+    "test": "yarn tsc && echo \"STATUS: no test specified\"",
     "tsc": "tsc"
   },
   "publishConfig": {

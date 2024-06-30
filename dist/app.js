@@ -12,7 +12,7 @@ let state = {
 if (process.argv[1].endsWith("app.js")) {
     Run("init");
 }
-export async function Run(status) {
+export async function Run(status, yargs = {}) {
     var _a;
     // Init: clear the screen
     clearScreen();
@@ -32,7 +32,7 @@ export async function Run(status) {
             state.totalBlocks = (_a = (await getRunnableBlocks(state.files, {
                 includeDisabled: true,
             }))) === null || _a === void 0 ? void 0 : _a.length;
-            await makeDotfilesMenu();
+            await makeDotfilesMenu(yargs);
         }
     }
     else if (existsSync(cache.path)) {
@@ -218,8 +218,9 @@ async function inspectMenu() {
         await inspectMenu();
     }
 }
-async function makeDotfilesMenu() {
-    if (await confirm({ message: `Build ${getStatus()}?` })) {
+async function makeDotfilesMenu(yargs = {}) {
+    if (((yargs === null || yargs === void 0 ? void 0 : yargs.dotfile) && (yargs === null || yargs === void 0 ? void 0 : yargs.auto)) ||
+        (await confirm({ message: `Build ${getStatus()}?` }))) {
         await Promise.all(state.blocks.map(executeBlock));
         if (await confirm({ message: "exit?" }))
             process.exit(0);
