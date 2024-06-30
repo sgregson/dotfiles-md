@@ -116,9 +116,9 @@ export async function getRunnableBlocks(inputFiles, options) {
     }
     return blocks;
 }
-export async function executeBlock(block, i) {
+export const executeBlock = (now) => async (block, i) => {
     const { options, source, content, lang } = block;
-    const buildDir = path.join(process.cwd(), "build");
+    const buildDir = path.join(process.cwd(), "build", now.toString());
     let targetFile;
     // NOTE: exit early if there's no action to be done
     if (!(options === null || options === void 0 ? void 0 : options.action)) {
@@ -147,33 +147,46 @@ export async function executeBlock(block, i) {
             `${i}-${path.parse(targetFile).base}`);
             await fs.ensureDir(path.dirname(buildFile));
             await fs.ensureDir(path.dirname(targetFile));
-            // build the source file and symlink it
+            // 1. build the source file and symlink it
             await fs.writeFile(buildFile, content).then(() => console.log(`🔨 built ${path.relative(process.cwd(), buildFile)}`), async (_error) => {
+                console.log("BUILD FAIL");
                 // backup & move old version
                 await fs.move(buildFile, buildFile + `.bak-${Date.now()}`);
                 await fs.writeFile(buildFile, content);
             });
-            await fs.ensureSymlink(buildFile, targetFile).then(
+            // 2. create a symlink at the targetfile location back to the source file
             // prettier-ignore
-            () => console.log(`🔗 linked ${targetFile} to ${path.relative(process.cwd(), buildFile)}`), async (_error) => {
+            const successMsg = `🔗 linked ${targetFile} to ${path.relative(process.cwd(), buildFile)}`;
+            // prettier-ignore
+            const backupMsg = `💾 backup created at ${targetFile + `.bak-${Date.now()}`}`;
+            await fs.ensureSymlink(buildFile, targetFile).then(() => console.log(successMsg), async (error) => {
                 // backup & move old version
-                await fs
-                    .move(targetFile, targetFile + `.bak-${Date.now()}`)
-                    .catch(() => { });
-                await fs.ensureSymlink(buildFile, targetFile).catch(() => { });
+                if (error.code === "EEXIST") {
+                    await fs
+                        .move(targetFile, targetFile + `.bak-${Date.now()}`)
+                        .then(() => console.log(backupMsg))
+                        .catch(() => { });
+                    await fs
+                        .ensureSymlink(buildFile, targetFile)
+                        .then(() => console.log(successMsg))
+                        .catch((err) => {
+                        console.log(`🚧 failed to create symlink at ${targetFile}`);
+                        console.log(err);
+                    });
+                }
             });
             break;
         default:
             console.log(`😬 hang in there, I still have to learn how to ${options === null || options === void 0 ? void 0 : options.action} a '${lang}' block.`);
             break;
     }
-}
+};
 /**
  * Check whether the block should be permitted to run, commonly:
  * disabled=true, when=os.darwin, when=os.win32
  */
 function isDisabled(options) {
-    // returns false or a string for a reason
+    // returns false or with a string containing the reason for being disabled
     if (options === null || options === void 0 ? void 0 : options.disabled)
         return colors.red("disabled=true");
     if (options === null || options === void 0 ? void 0 : options.when) {

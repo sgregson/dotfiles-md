@@ -33,14 +33,16 @@ export async function Run(status, yargs = {}) {
             await makeDotfilesMenu(yargs);
         }
     }
-    else if (existsSync(cache.path)) {
-        // ONBOARDING 2. Load saved settings from cache
-        await loadSettingsMenu();
-    }
     else {
-        // ONBOARDING 3. Standard onboarding
-        await pickFilesMenu();
-        await pickBlocksMenu();
+        if (existsSync(cache.path)) {
+            // ONBOARDING 2. Load saved settings from cache
+            await loadSettingsMenu();
+        }
+        else {
+            // ONBOARDING 3. Standard onboarding
+            await pickFilesMenu();
+            await pickBlocksMenu();
+        }
     }
     // Run the main loop! Loops until we run the exit menu
     while (status !== "[exit]") {
@@ -226,7 +228,8 @@ async function makeDotfilesMenu(yargs = {}) {
     const isAuto = (yargs === null || yargs === void 0 ? void 0 : yargs.dotfile) && (yargs === null || yargs === void 0 ? void 0 : yargs.auto);
     if (isAuto || (await confirm({ message: `Build ${getStatus()}?` }))) {
         console.log(`Building ${getStatus()}:`);
-        await Promise.all(state.blocks.map(executeBlock));
+        const now = Date.now();
+        await Promise.all(state.blocks.map(executeBlock(now)));
         if (isAuto || (await confirm({ message: "exit?" })))
             process.exit(0);
     }
