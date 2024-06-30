@@ -318,7 +318,7 @@ async function manageCacheMenu() {
         files.every((savedFile) =>
           state.files.find((newFile) => savedFile === newFile)
         )
-          ? "all blocks already saved"
+          ? "(all blocks already saved)"
           : false,
     },
   ];
