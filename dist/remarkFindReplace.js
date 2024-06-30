@@ -3,7 +3,7 @@ import escapeStringRegexp from "escape-string-regexp";
 // reformatted gatsby-remark-find-replace into a generic remark plugin
 export default function findReplace(options) {
     const { replacements = {}, prefix = "%" } = options;
-    return (tree, file) => {
+    return (tree, _file) => {
         // Attaches prefix to the start of the string.
         const attachPrefix = (str) => (prefix || "") + str;
         // Removes prefix from the start of the string.

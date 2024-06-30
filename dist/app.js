@@ -1,6 +1,6 @@
 import { confirm, select, Separator } from "@inquirer/prompts";
 import { globAsync, getRunnableBlocks, existsSync, cache, clearScreen, sleep, executeBlock, } from "./api.js";
-import { select as multiSelect, } from "inquirer-select-pro";
+import { select as multiSelect } from "inquirer-select-pro";
 import colors from "colors/safe.js";
 let state = {
     filter: "**/*.md",

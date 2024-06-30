@@ -1,8 +1,7 @@
-import { confirm, select, editor, Separator } from "@inquirer/prompts";
+import { confirm, select, Separator } from "@inquirer/prompts";
 import {
   globAsync,
   getRunnableBlocks,
-  Block as BlockType,
   State,
   existsSync,
   cache,
@@ -12,11 +11,7 @@ import {
   executeBlock,
 } from "./api.js";
 
-import {
-  SelectOption,
-  SelectValue,
-  select as multiSelect,
-} from "inquirer-select-pro";
+import { SelectOption, select as multiSelect } from "inquirer-select-pro";
 import colors from "colors/safe.js";
 
 type AppStatus =
