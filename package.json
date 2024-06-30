@@ -24,6 +24,7 @@
     "darwin"
   ],
   "scripts": {
+    "prerelease": "yarn tsc",
     "release": "np",
     "prejfdi": "yarn",
     "jfdi": "cd dotfiles; node ../cli.mjs run -- --pattern \"**/*.md\" --actions symlink,build; cd -",

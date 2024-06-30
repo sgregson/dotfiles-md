@@ -8,7 +8,6 @@ let state = {
     blocks: [],
     totalBlocks: undefined,
 };
-console.log("process", process.argv);
 // execute if invoked directly
 if (process.argv[1].endsWith("app.js")) {
     Run("init");
