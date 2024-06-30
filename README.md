@@ -22,14 +22,19 @@
 Maintain your system configuration as a collection of installable markdown blocks
 
 ## Usage
+> _**Requires:** node.js_. See [contributing] for instructions on installing a local copy
 
 Simply navigate to your folder of markdown and then run the interactive CLI:
 
-```
+```sh title="run the program" disabled=true
 $ npx dotfiles-md
 ```
 
-> _**Requires:** node.js_. See [contributing] for instructions on installing a local copy
+Or if you have a dotfile ready-to-go, invoke it with:
+
+```sh title="invoke a dotfile" disabled=true
+$ npx dotfiles-md --auto DOTFILE.md
+```
 
 [contributing]: #contributing
 
@@ -37,19 +42,11 @@ $ npx dotfiles-md
 
 _run the `help` command to view help pages_
 
-`config` set the parameters for your CLI
+```sh disabled=true
+$ npx dotfiles-md --help
+```
 
-- **settings** – interactive prompt to define:
-  - `name=<string>` personalize your CLI if you like
-  - `pattern=<glob>` to define the matching parameters
-- **refresh** – refresh the file list
-- **reset** - reset the CLI settings
-
-`select` select files to use as dotfles sources
-
-`run` select the code blocks to build into dotfiles (from the selected files)
-
-## Features
+## Writing your Dotfiles in markdown
 
 **Code block metadata**
 
