@@ -1,12 +1,12 @@
 {
   "name": "dotfiles-md",
   "type": "module",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "license": "GPL-3.0-or-later",
   "author": "Spencer Gregson",
   "description": "Manage your dotfiles with markdown",
   "bin": "./cli.mjs",
-  "main": "src/vorpal.mjs",
+  "main": "src/app.ts",
   "homepage": "https://github.com/sgregson/dotfiles-md#readme",
   "repository": {
     "type": "git",

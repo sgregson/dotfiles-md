@@ -16,7 +16,7 @@ let state = {
     if (process.env.DOTFILE) {
         let theFile = existsSync(process.env.DOTFILE);
         if (!theFile) {
-            console.log(`${process.env.DOTFILE} not found.`);
+            console.log(`$DOTFILE=${process.env.DOTFILE} not found.`);
             await sleep(500);
         }
         else {
@@ -37,6 +37,9 @@ let state = {
     // Run the app! Loops until we run the exit menu
     while (status !== "[exit]") {
         status = await Main();
+        // Clear screen between runs of Main()
+        if (status !== "[exit]")
+            clearScreen();
     }
 })("init");
 function getStatus() {
@@ -51,8 +54,6 @@ function getStatus() {
  */
 async function Main() {
     var _a;
-    // Clear screen every main() cycle
-    clearScreen();
     const hasSettings = existsSync(cache.path);
     state.totalBlocks = (_a = (await getRunnableBlocks(state.files, {
         includeDisabled: true,
@@ -237,7 +238,7 @@ async function manageCacheMenu() {
             value: "save",
             disabled: blocks.every(({ content: savedContent }) => state.blocks.find(({ content: newContent }) => savedContent === newContent)) &&
                 files.every((savedFile) => state.files.find((newFile) => savedFile === newFile))
-                ? "all blocks already saved"
+                ? "(all blocks already saved)"
                 : false,
         },
     ];
