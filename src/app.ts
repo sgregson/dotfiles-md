@@ -47,14 +47,14 @@ export async function Run(status: AppStatus, yargs: Yargs = {}) {
   clearScreen();
 
   // Load saved content from $DOTFILE or .dotfile-md-cache
-  if (process.env.DOTFILE) {
-    let theFile = existsSync(process.env.DOTFILE);
+  if (yargs.dotfile) {
+    let theFile = existsSync(yargs.dotfile);
 
     if (!theFile) {
-      console.log(`$DOTFILE=${process.env.DOTFILE} not found.`);
+      console.log(`(file "${yargs.dotfile}" not found)`);
       await sleep(500);
     } else {
-      console.log(`Found ${theFile}:`);
+      console.log(`(found ${theFile})`);
       state.files = [theFile];
       state.blocks = await getRunnableBlocks(state.files, {
         includeDisabled: false,
@@ -293,13 +293,12 @@ async function inspectMenu() {
 }
 
 async function makeDotfilesMenu(yargs: Yargs = {}) {
-  if (
-    (yargs?.dotfile && yargs?.auto) ||
-    (await confirm({ message: `Build ${getStatus()}?` }))
-  ) {
+  const isAuto = yargs?.dotfile && yargs?.auto;
+  if (isAuto || (await confirm({ message: `Build ${getStatus()}?` }))) {
+    console.log(`Building ${getStatus()}:`);
     await Promise.all(state.blocks.map(executeBlock));
 
-    if (await confirm({ message: "exit?" })) process.exit(0);
+    if (isAuto || (await confirm({ message: "exit?" }))) process.exit(0);
   } else {
     await sleep(500);
     console.log("(cancelled)");

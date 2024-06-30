@@ -17,14 +17,14 @@ export async function Run(status, yargs = {}) {
     // Init: clear the screen
     clearScreen();
     // Load saved content from $DOTFILE or .dotfile-md-cache
-    if (process.env.DOTFILE) {
-        let theFile = existsSync(process.env.DOTFILE);
+    if (yargs.dotfile) {
+        let theFile = existsSync(yargs.dotfile);
         if (!theFile) {
-            console.log(`$DOTFILE=${process.env.DOTFILE} not found.`);
+            console.log(`(file "${yargs.dotfile}" not found)`);
             await sleep(500);
         }
         else {
-            console.log(`Found ${theFile}:`);
+            console.log(`(found ${theFile})`);
             state.files = [theFile];
             state.blocks = await getRunnableBlocks(state.files, {
                 includeDisabled: false,
@@ -219,10 +219,11 @@ async function inspectMenu() {
     }
 }
 async function makeDotfilesMenu(yargs = {}) {
-    if (((yargs === null || yargs === void 0 ? void 0 : yargs.dotfile) && (yargs === null || yargs === void 0 ? void 0 : yargs.auto)) ||
-        (await confirm({ message: `Build ${getStatus()}?` }))) {
+    const isAuto = (yargs === null || yargs === void 0 ? void 0 : yargs.dotfile) && (yargs === null || yargs === void 0 ? void 0 : yargs.auto);
+    if (isAuto || (await confirm({ message: `Build ${getStatus()}?` }))) {
+        console.log(`Building ${getStatus()}:`);
         await Promise.all(state.blocks.map(executeBlock));
-        if (await confirm({ message: "exit?" }))
+        if (isAuto || (await confirm({ message: "exit?" })))
             process.exit(0);
     }
     else {
