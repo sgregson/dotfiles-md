@@ -148,7 +148,7 @@ export async function executeBlock(block, i) {
             await fs.ensureDir(path.dirname(buildFile));
             await fs.ensureDir(path.dirname(targetFile));
             // build the source file and symlink it
-            await fs.writeFile(buildFile, content).then(() => console.log(`🔨 built ${path.relative(process.cwd(), buildFile)}`), async (error) => {
+            await fs.writeFile(buildFile, content).then(() => console.log(`🔨 built ${path.relative(process.cwd(), buildFile)}`), async (_error) => {
                 // backup & move old version
                 await fs.move(buildFile, buildFile + `.bak-${Date.now()}`);
                 await fs.writeFile(buildFile, content);

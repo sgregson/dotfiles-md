@@ -14,10 +14,8 @@ if (process.argv[1].endsWith("app.js")) {
 }
 export async function Run(status, yargs = {}) {
     var _a;
-    // Init: clear the screen
-    clearScreen();
-    // Load saved content from $DOTFILE or .dotfile-md-cache
     if (yargs.dotfile) {
+        // ONBOARDING 1: Load saved content from $DOTFILE or .dotfile-md-cache
         let theFile = existsSync(yargs.dotfile);
         if (!theFile) {
             console.log(`(file "${yargs.dotfile}" not found)`);
@@ -36,9 +34,15 @@ export async function Run(status, yargs = {}) {
         }
     }
     else if (existsSync(cache.path)) {
+        // ONBOARDING 2. Load saved settings from cache
         await loadSettingsMenu();
     }
-    // Run the app! Loops until we run the exit menu
+    else {
+        // ONBOARDING 3. Standard onboarding
+        await pickFilesMenu();
+        await pickBlocksMenu();
+    }
+    // Run the main loop! Loops until we run the exit menu
     while (status !== "[exit]") {
         status = await Main();
         // Clear screen between runs of Main()
