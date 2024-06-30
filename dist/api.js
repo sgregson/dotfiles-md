@@ -118,7 +118,7 @@ export async function getRunnableBlocks(inputFiles, options) {
 }
 export const executeBlock = (now) => async (block, i) => {
     const { options, source, content, lang } = block;
-    const buildDir = path.join(process.cwd(), "build", now.toString());
+    const buildDir = path.join(process.cwd(), "build", now);
     let targetFile;
     // NOTE: exit early if there's no action to be done
     if (!(options === null || options === void 0 ? void 0 : options.action)) {

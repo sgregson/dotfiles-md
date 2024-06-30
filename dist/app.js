@@ -15,7 +15,7 @@ if (process.argv[1].endsWith("app.js")) {
 export async function Run(status, yargs = {}) {
     var _a;
     if (yargs.dotfile) {
-        // ONBOARDING 1: Load saved content from $DOTFILE or .dotfile-md-cache
+        // ONBOARDING 1: Load saved content from an individual dotfile
         let theFile = existsSync(yargs.dotfile);
         if (!theFile) {
             console.log(`(file "${yargs.dotfile}" not found)`);
@@ -35,7 +35,7 @@ export async function Run(status, yargs = {}) {
     }
     else {
         if (existsSync(cache.path)) {
-            // ONBOARDING 2. Load saved settings from cache
+            // ONBOARDING 2. Load saved settings from .dotfile-md-cache file
             await loadSettingsMenu();
         }
         else {
@@ -228,7 +228,7 @@ async function makeDotfilesMenu(yargs = {}) {
     const isAuto = (yargs === null || yargs === void 0 ? void 0 : yargs.dotfile) && (yargs === null || yargs === void 0 ? void 0 : yargs.auto);
     if (isAuto || (await confirm({ message: `Build ${getStatus()}?` }))) {
         console.log(`Building ${getStatus()}:`);
-        const now = Date.now();
+        const now = new Date().toISOString();
         await Promise.all(state.blocks.map(executeBlock(now)));
         if (isAuto || (await confirm({ message: "exit?" })))
             process.exit(0);
