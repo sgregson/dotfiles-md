@@ -33,7 +33,11 @@ export async function Run(status, yargs = {}) {
     else {
         if (existsSync(cache.path)) {
             // ONBOARDING 2. Load saved settings from .dotfile-md-cache file
-            await loadSettingsMenu();
+            if (!(await loadSettingsMenu())) {
+                // ONBOARDING 3. Standard onboarding
+                await pickFilesMenu();
+                await pickBlocksMenu();
+            }
         }
         else {
             // ONBOARDING 3. Standard onboarding
@@ -298,8 +302,11 @@ async function saveSettingsMenu() {
     }
 }
 async function loadSettingsMenu() {
-    if (await confirm({ message: "Load saved selections?" }))
+    if (await confirm({ message: "Load saved selections?" })) {
         state = cache.get();
+        return true;
+    }
+    return false;
 }
 async function removeSettingsMenu() {
     if (await confirm({ message: "Are you sure?" }))

@@ -247,7 +247,6 @@ export const executeBlock = (now: string) => async (block: Block, i) => {
         () => console.log(successMsg),
         async (_error) => {
           // backup & move old version
-          await console.log("DERP");
           const oldFile = await fs.readlink(targetFile, {
             encoding: "utf8",
           });

@@ -173,7 +173,6 @@ export const executeBlock = (now) => async (block, i) => {
             const backupMsg = `💾 backup created at ${targetFile + `.bak-${now}`}`;
             await fs.ensureSymlink(buildFile, targetFile).then(() => console.log(successMsg), async (_error) => {
                 // backup & move old version
-                await console.log("DERP");
                 const oldFile = await fs.readlink(targetFile, {
                     encoding: "utf8",
                 });
