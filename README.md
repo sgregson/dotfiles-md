@@ -30,6 +30,8 @@ Simply navigate to your folder of markdown and then run the interactive CLI:
 $ npx dotfiles-md
 ```
 
+![running the demo](./docs/demo_screenshot.png)
+
 Or if you have a dotfile ready-to-go, invoke it with:
 
 ```sh title="invoke a dotfile" disabled=true
