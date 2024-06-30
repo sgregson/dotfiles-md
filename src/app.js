@@ -20,16 +20,20 @@ if (process.env.DOTFILE) {
     }
 }
 else if (existsSync(cache.path)) {
-    if (await confirm({ message: "Load saved settings?" })) {
-        state = cache.get();
-    }
+    await loadSettingsMenu();
 }
 (async function Main() {
+    var _a;
     // Clear screen every main() cycle
     clearScreen();
-    console.log(`Selected: ${state.blocks.length} blocks from ${state.files.length} files`);
+    const hasSettings = existsSync(cache.path);
+    const allBlocks = (_a = (await getRunnableBlocks(state.files, {
+        includeDisabled: false,
+    }))) === null || _a === void 0 ? void 0 : _a.length;
+    console.log(`Selected: ${state.blocks.length}${allBlocks ? ` of ${allBlocks}` : ""} blocks from ${state.files.length} files`);
     const choice = await select({
         message: "Main Menu",
+        pageSize: 10,
         default: state.blocks.length > 0
             ? "inspect"
             : state.files.length > 0
@@ -54,17 +58,21 @@ else if (existsSync(cache.path)) {
             },
             new Separator(),
             {
-                name: "Make Dotfile",
+                name: "-> Build Dotfiles",
                 value: "makeDotfiles",
                 description: "build your selected dotfiles",
                 disabled: state.blocks.length === 0,
             },
+            new Separator(),
             {
-                name: "Clear Saved Settings",
-                value: "clearCache",
-                disabled: !existsSync(cache.path) && "(saved settings not found)",
+                name: hasSettings ? "Manage Saved Settings" : "Save Settings",
+                value: "manageCache",
+                disabled: (state.blocks.length === 0 || state.files.length === 0) &&
+                    !hasSettings
+                    ? "(select files or blocks)"
+                    : false,
             },
-            { name: "exit", value: "exit" },
+            { name: "[exit]", value: "exit" },
         ],
     });
     switch (choice) {
@@ -80,8 +88,8 @@ else if (existsSync(cache.path)) {
         case "makeDotfiles":
             await makeDotfilesMenu();
             break;
-        case "clearCache":
-            await clearCacheMenu();
+        case "manageCache":
+            await manageCacheMenu();
             break;
         case "exit":
             await preExitMenu();
@@ -97,7 +105,7 @@ async function pickFilesMenu() {
         defaultValue: state.files,
         options: async (input) => {
             let matches = await globAsync(join(process.cwd(), state.filter), {
-                ignore: "**/node_modules/**",
+                ignore: ["**/node_modules/**", "**/build/**"],
             });
             if (input) {
                 const inputLower = input.toLowerCase();
@@ -156,7 +164,7 @@ async function inspectMenu() {
                 matches = matches.filter((block) => block.meta.toLowerCase().includes(inputLower));
             }
             return [
-                { name: "<- BACK <-", value: null },
+                { name: "[back]", value: null },
                 new Separator(),
                 ...matches.map((block) => ({
                     name: block.label,
@@ -183,31 +191,64 @@ async function inspectMenu() {
 async function makeDotfilesMenu() {
     if (await confirm({ message: `Execute all ${state.blocks.length} blocks?` })) {
         await Promise.all(state.blocks.map(executeBlock));
+        await confirm({ message: "continue?" });
     }
     else {
-        console.log("Maybe inspect individual blocks");
-    }
-    cache.set(state);
-    await sleep(300);
-    process.stdout.write(".");
-    await sleep(300);
-    process.stdout.write(".");
-    await sleep(300);
-    process.stdout.write(".");
-    await sleep(300);
-    process.stdout.write(".");
-    await sleep(300);
-}
-async function clearCacheMenu() {
-    if (await confirm({ message: "are you sure?" })) {
-        cache.remove();
+        await sleep(500);
+        console.log("cancelled");
     }
 }
-async function preExitMenu() {
+async function manageCacheMenu() {
+    if (!existsSync(cache.path)) {
+        await saveSettingsMenu();
+        return;
+    }
+    let choices = [
+        {
+            name: "Save Settings",
+            value: "save",
+            disabled: cache
+                .get()
+                .blocks.every(({ content: savedContent }) => state.blocks.find(({ content: newContent }) => savedContent === newContent)) && "all blocks already saved",
+        },
+    ];
+    if (existsSync(cache.path)) {
+        choices = choices.concat([
+            { name: "Load Settings", value: "load", disabled: false },
+            { name: "Remove Settings", value: "remove", disabled: false },
+        ]);
+    }
+    const choice = await select({
+        message: "Settings",
+        choices,
+    });
+    switch (choice) {
+        case "save":
+            await saveSettingsMenu();
+            break;
+        case "load":
+            await loadSettingsMenu();
+            break;
+        case "remove":
+            await removeSettingsMenu();
+            break;
+    }
+}
+async function saveSettingsMenu() {
     if (await confirm({ message: "Save current settings?" })) {
-        // TODO: create a .dotfiles-md cache file
         cache.set(state);
         console.log(`saved to ${cache.path}`);
     }
+}
+async function loadSettingsMenu() {
+    if (await confirm({ message: "Load saved settings?" }))
+        state = cache.get();
+}
+async function removeSettingsMenu() {
+    if (await confirm({ message: "are you sure?" }))
+        cache.remove();
+}
+async function preExitMenu() {
+    await saveSettingsMenu();
     process.exit(0);
 }

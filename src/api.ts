@@ -168,22 +168,28 @@ export async function getRunnableBlocks(
   return blocks;
 }
 
-export async function executeBlock(block, i) {
-  const {
-    options: { action },
-    targetPath,
-    source,
-    content,
-    lang,
-  } = block;
+export async function executeBlock(block: Block, i) {
+  const { options, source, content, lang } = block;
   const buildDir = path.join(process.cwd(), "build");
   let targetFile;
 
-  if (action === "build" || action === "symlink") {
-    targetFile = path.resolve(path.dirname(source), targetPath);
+  // NOTE: exit early if there's no action to be done
+  if (!options?.action) {
+    console.log(`↪ SKIPPED (no action) ${colors.reset(block.label)}`);
+    return;
   }
 
-  switch (action) {
+  if (options.action === "build" || options.action === "symlink") {
+    // BAIL if there's no target path to build/link to
+    if (!options.targetPath) {
+      console.log(`↪ SKIPPED (no targetPath) ${colors.reset(block.label)}`);
+      return;
+    }
+
+    targetFile = path.resolve(path.dirname(source), options.targetPath);
+  }
+
+  switch (options?.action) {
     case "build":
       // make sure the folder is available before writing
       await fs.ensureFile(targetFile);
@@ -225,7 +231,7 @@ export async function executeBlock(block, i) {
       break;
     default:
       console.log(
-        `😬 hang in there, I still have to learn how to ${action} a '${lang}' block.`
+        `😬 hang in there, I still have to learn how to ${options?.action} a '${lang}' block.`
       );
       break;
   }
