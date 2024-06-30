@@ -61,7 +61,7 @@ The `action=symlink` file will convert codeblocks to a file in `/build/*` and sy
 
 This example creates a file in your home directory `~/global-symlink.md` symlinked to `../build/#-global-symlink.md`
 
-```md $HOME/global-symlink.md action=symlink title="Demo: symlink action (GLOBAL)"
+```md $HOME/dotfiles-md-demo.md action=symlink title="Demo: symlink action (GLOBAL)"
 Hello world!
 ```
 
