@@ -35,7 +35,12 @@ let state: State = {
   totalBlocks: undefined,
 };
 
-(async function Run(status: AppStatus) {
+// execute if invoked directly
+if (process.argv[1].endsWith("app.js")) {
+  Run("init");
+}
+
+export async function Run(status: AppStatus) {
   // Init: clear the screen
   clearScreen();
 
@@ -71,7 +76,7 @@ let state: State = {
     // Clear screen between runs of Main()
     if (status !== "[exit]") clearScreen();
   }
-})("init");
+}
 
 function getStatus() {
   return `${state.blocks.length}${

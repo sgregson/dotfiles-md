@@ -8,7 +8,12 @@ let state = {
     blocks: [],
     totalBlocks: undefined,
 };
-(async function Run(status) {
+console.log("process", process.argv);
+// execute if invoked directly
+if (process.argv[1].endsWith("app.js")) {
+    Run("init");
+}
+export async function Run(status) {
     var _a;
     // Init: clear the screen
     clearScreen();
@@ -41,7 +46,7 @@ let state = {
         if (status !== "[exit]")
             clearScreen();
     }
-})("init");
+}
 function getStatus() {
     return `${state.blocks.length}${state.totalBlocks ? ` of ${state.totalBlocks}` : ""} blocks from ${state.files.length} files`;
 }
