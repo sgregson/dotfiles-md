@@ -21,6 +21,14 @@ const env = dotenv.parse(
     .catch(() => "")
 );
 
+export interface State {
+  // file filter, glob-compatible
+  filter: string;
+  // selected files
+  files: string[];
+  // selected blocks
+  blocks: Block[];
+}
 export interface Block {
   // the markdown language signifier
   lang: string;

@@ -1,15 +1,15 @@
 import { confirm, select, Separator } from "@inquirer/prompts";
 import { globAsync, getRunnableBlocks, existsSync, cache, clearScreen, sleep, executeBlock, } from "./api.js";
-import { join } from "path";
 import { select as multiSelect } from "inquirer-select-pro";
 import colors from "colors/safe.js";
 let state = {
-    status: "init",
     filter: "**/*.md",
     files: [],
     blocks: [],
 };
+// Init: clear the screen
 clearScreen();
+// Load saved content - either DOTFILE or .dotfile-md-cache
 if (process.env.DOTFILE) {
     let theFile = existsSync(process.env.DOTFILE);
     if (theFile && (await confirm({ message: `Use ${theFile}?` }))) {
@@ -22,7 +22,15 @@ if (process.env.DOTFILE) {
 else if (existsSync(cache.path)) {
     await loadSettingsMenu();
 }
-(async function Main() {
+// Run the app!
+(async function name(status) {
+    while (status !== "exit") {
+        status = await Main();
+    }
+})("init");
+///////////////////////
+// Menus
+async function Main() {
     var _a;
     // Clear screen every main() cycle
     clearScreen();
@@ -94,8 +102,8 @@ else if (existsSync(cache.path)) {
         case "exit":
             await preExitMenu();
     }
-    await Main();
-})();
+    return choice;
+}
 async function pickFilesMenu() {
     const choice = await multiSelect({
         message: "Source Files",
@@ -104,7 +112,7 @@ async function pickFilesMenu() {
         loop: true,
         defaultValue: state.files,
         options: async (input) => {
-            let matches = await globAsync(join(process.cwd(), state.filter), {
+            let matches = await globAsync(state.filter, {
                 ignore: ["**/node_modules/**", "**/build/**"],
             });
             if (input) {
@@ -112,7 +120,7 @@ async function pickFilesMenu() {
                 matches = matches.filter((path) => path.toLowerCase().includes(inputLower));
             }
             return matches.map((path) => ({
-                name: path.replace(process.cwd(), "."),
+                name: path,
                 value: path,
             }));
         },
@@ -165,12 +173,10 @@ async function inspectMenu() {
             }
             return [
                 { name: "[back]", value: null },
-                new Separator(),
                 ...matches.map((block) => ({
                     name: block.label,
                     value: block,
                 })),
-                new Separator(),
             ];
         },
     });
@@ -203,13 +209,16 @@ async function manageCacheMenu() {
         await saveSettingsMenu();
         return;
     }
+    const { blocks, files } = cache.get();
     let choices = [
+        { name: "[back]", value: null },
         {
             name: "Save Settings",
             value: "save",
-            disabled: cache
-                .get()
-                .blocks.every(({ content: savedContent }) => state.blocks.find(({ content: newContent }) => savedContent === newContent)) && "all blocks already saved",
+            disabled: blocks.every(({ content: savedContent }) => state.blocks.find(({ content: newContent }) => savedContent === newContent)) &&
+                files.every((savedFile) => state.files.find((newFile) => savedFile === newFile))
+                ? "all blocks already saved"
+                : false,
         },
     ];
     if (existsSync(cache.path)) {

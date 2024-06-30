@@ -3,6 +3,7 @@ import {
   globAsync,
   getRunnableBlocks,
   Block as BlockType,
+  State,
   existsSync,
   cache,
   Block,
@@ -10,36 +11,29 @@ import {
   sleep,
   executeBlock,
 } from "./api.js";
-import { join } from "path";
+
 import { select as multiSelect } from "inquirer-select-pro";
 import colors from "colors/safe.js";
 
-interface State {
-  status:
-    | "init"
-    | "pickFiles"
-    | "pickBlocks"
-    | "inspect"
-    | "makeDotfiles"
-    | "manageCache"
-    | "exit";
-  // file filter, glob-compatible
-  filter: string;
-  // selected files
-  files: string[];
-  // selected blocks
-  blocks: BlockType[];
-}
+type AppStatus =
+  | "init"
+  | "pickFiles"
+  | "pickBlocks"
+  | "inspect"
+  | "makeDotfiles"
+  | "manageCache"
+  | "exit";
 
 let state: State = {
-  status: "init",
   filter: "**/*.md",
   files: [],
   blocks: [],
 };
 
+// Init: clear the screen
 clearScreen();
 
+// Load saved content - either DOTFILE or .dotfile-md-cache
 if (process.env.DOTFILE) {
   let theFile = existsSync(process.env.DOTFILE);
 
@@ -53,7 +47,21 @@ if (process.env.DOTFILE) {
   await loadSettingsMenu();
 }
 
-(async function Main() {
+// Run the app! Loops until we run the exit menu
+(async function name(status: AppStatus) {
+  while (status !== "exit") {
+    status = await Main();
+  }
+})("init");
+
+/**
+ * MAIN MENU
+ * 1. source files
+ * 2. source blocks from those files
+ * 3. (optional) inspect the content of the blocks
+ * 4. build the dotfiles
+ */
+async function Main() {
   // Clear screen every main() cycle
   clearScreen();
   const hasSettings = existsSync(cache.path);
@@ -69,7 +77,7 @@ if (process.env.DOTFILE) {
     } blocks from ${state.files.length} files`
   );
 
-  const choice = await select<State["status"]>({
+  const choice = await select<AppStatus>({
     message: "Main Menu",
     pageSize: 10,
     default:
@@ -136,8 +144,8 @@ if (process.env.DOTFILE) {
       await preExitMenu();
   }
 
-  await Main();
-})();
+  return choice;
+}
 
 async function pickFilesMenu() {
   const choice = await multiSelect({
@@ -147,7 +155,7 @@ async function pickFilesMenu() {
     loop: true,
     defaultValue: state.files,
     options: async (input) => {
-      let matches = await globAsync(join(process.cwd(), state.filter), {
+      let matches = await globAsync(state.filter, {
         ignore: ["**/node_modules/**", "**/build/**"],
       });
 
@@ -158,7 +166,7 @@ async function pickFilesMenu() {
         );
       }
       return matches.map((path) => ({
-        name: path.replace(process.cwd(), "."),
+        name: path,
         value: path,
       }));
     },
@@ -223,12 +231,10 @@ async function inspectMenu() {
 
       return [
         { name: "[back]", value: null },
-        new Separator(),
         ...matches.map((block) => ({
           name: block.label,
           value: block,
         })),
-        new Separator(),
       ];
     },
   });
@@ -278,18 +284,24 @@ async function manageCacheMenu() {
     return;
   }
 
+  const { blocks, files } = cache.get();
+
   let choices = [
+    { name: "[back]", value: null },
     {
       name: "Save Settings",
       value: "save",
       disabled:
-        cache
-          .get()
-          .blocks.every(({ content: savedContent }) =>
-            state.blocks.find(
-              ({ content: newContent }) => savedContent === newContent
-            )
-          ) && "all blocks already saved",
+        blocks.every(({ content: savedContent }) =>
+          state.blocks.find(
+            ({ content: newContent }) => savedContent === newContent
+          )
+        ) &&
+        files.every((savedFile) =>
+          state.files.find((newFile) => savedFile === newFile)
+        )
+          ? "all blocks already saved"
+          : false,
     },
   ];
 
