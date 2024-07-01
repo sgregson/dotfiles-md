@@ -163,7 +163,7 @@ async function pickFilesMenu(yargs = {}) {
             let matches = await globAsync(state.filter, {
                 ignore: ["**/build/**"].concat(
                 // generally ignore node_modules unless we're running in demo mode
-                yargs.demo ? ["**/node_modules/**"] : []),
+                !yargs.demo ? ["**/node_modules/**"] : []),
             });
             if (input) {
                 const inputLower = input.toLowerCase();
