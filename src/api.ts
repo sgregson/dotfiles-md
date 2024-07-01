@@ -216,28 +216,28 @@ export async function getRunnableBlocks(
 }
 
 export const executeBlock = (now: string) => async (block: Block, i) => {
-  const { options, source, content, lang } = block;
+  const { options, content, lang } = block;
   const buildDir = path.join(process.cwd(), "build", now);
   let targetFile;
 
-  // NOTE: exit early if there's no action to be done
+  // BAIL - exit early if there's no action to be done
   if (!options?.action) {
     console.log(`↪ SKIPPED (no action) ${colors.reset(block.label)}`);
     return;
   }
 
-  if (options.action === "build" || options.action === "symlink") {
-    // BAIL if there's no target path to build/link to
-    if (!options.targetPath) {
-      console.log(`↪ SKIPPED (no targetPath) ${colors.reset(block.label)}`);
-      return;
-    }
-
-    targetFile = path.resolve(path.dirname(source), options.targetPath);
+  // the file goes to the target path from where dotfiles-md is run
+  if (options?.targetPath) {
+    targetFile = path.resolve(process.cwd(), options.targetPath);
   }
 
   switch (options?.action) {
     case "build":
+      if (!options.targetPath) {
+        console.log(`↪ SKIPPED (no targetPath) ${colors.reset(block.label)}`);
+        return;
+      }
+
       // make sure the folder is available before writing
       await fs.ensureFile(targetFile);
       await fs.writeFile(targetFile, content).then(() => {
@@ -245,6 +245,11 @@ export const executeBlock = (now: string) => async (block: Block, i) => {
       });
       break;
     case "symlink":
+      if (!options.targetPath) {
+        console.log(`↪ SKIPPED (no targetPath) ${colors.reset(block.label)}`);
+        return;
+      }
+
       const buildFile = path.join(
         buildDir,
         "links",
