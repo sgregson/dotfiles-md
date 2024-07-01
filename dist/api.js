@@ -79,9 +79,11 @@ export const cache = {
     },
 };
 export const getDemoPath = () => {
-    const demoDirname = path.join(fileURLToPath(import.meta.url), "../../demo/");
-    console.log("demoDirname: ", demoDirname);
-    return { dirname: demoDirname, filter: path.join(demoDirname, "**/*.md") };
+    const dirname = path.join(fileURLToPath(import.meta.url), "../../demo/");
+    const filter = path.join(dirname, "**", "*.md");
+    console.log("dirname: ", dirname);
+    console.log("filter: ", filter);
+    return { dirname, filter };
 };
 /***************
  * Blocks
