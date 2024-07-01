@@ -6,7 +6,6 @@ import {
   existsSync,
   cache,
   Block,
-  clearScreen,
   sleep,
   executeBlock,
   getDemoPath,
@@ -79,9 +78,6 @@ export async function Run(status: AppStatus, yargs: Yargs = {}) {
   // Run the main loop! Loops until we run the exit menu
   while (status !== "[exit]") {
     status = await Main(yargs);
-
-    // Clear screen between runs of Main()
-    if (status !== "[exit]") clearScreen();
   }
 }
 

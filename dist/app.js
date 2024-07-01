@@ -1,5 +1,5 @@
 import { confirm, select, Separator } from "@inquirer/prompts";
-import { globAsync, getRunnableBlocks, existsSync, cache, clearScreen, sleep, executeBlock, getDemoPath, menuValidator, } from "./api.js";
+import { globAsync, getRunnableBlocks, existsSync, cache, sleep, executeBlock, getDemoPath, menuValidator, } from "./api.js";
 import { select as multiSelect } from "inquirer-select-pro";
 import colors from "colors/safe.js";
 let state = {
@@ -50,9 +50,6 @@ export async function Run(status, yargs = {}) {
     // Run the main loop! Loops until we run the exit menu
     while (status !== "[exit]") {
         status = await Main(yargs);
-        // Clear screen between runs of Main()
-        if (status !== "[exit]")
-            clearScreen();
     }
 }
 /**
