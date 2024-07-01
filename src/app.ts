@@ -9,6 +9,8 @@ import {
   clearScreen,
   sleep,
   executeBlock,
+  getDemoPath,
+  menuValidator,
 } from "./api.js";
 
 import { SelectOption, select as multiSelect } from "inquirer-select-pro";
@@ -38,7 +40,13 @@ if (process.argv[1].endsWith("app.js")) {
 }
 
 export async function Run(status: AppStatus, yargs: Yargs = {}) {
-  if (yargs.dotfile) {
+  let skipOnboarding = false;
+
+  if (yargs.demo) {
+    skipOnboarding = false;
+    state.filter = getDemoPath().filter;
+  } else if (yargs.dotfile) {
+    skipOnboarding = true;
     // ONBOARDING 1: Load saved content from an individual dotfile
     let theFile = existsSync(yargs.dotfile);
 
@@ -55,24 +63,22 @@ export async function Run(status: AppStatus, yargs: Yargs = {}) {
 
       await makeDotfilesMenu(yargs);
     }
-  } else {
-    if (existsSync(cache.path)) {
-      // ONBOARDING 2. Load saved settings from .dotfile-md-cache file
-      if (!(await loadSettingsMenu())) {
-        // ONBOARDING 3. Standard onboarding
-        await pickFilesMenu();
-        await pickBlocksMenu();
-      }
-    } else {
-      // ONBOARDING 3. Standard onboarding
-      await pickFilesMenu();
-      await pickBlocksMenu();
+  } else if (existsSync(cache.path)) {
+    // ONBOARDING 2. Load saved settings from .dotfile-md-cache file
+    if (await loadSettingsMenu()) {
+      skipOnboarding = true;
     }
+  }
+
+  if (!skipOnboarding) {
+    // ONBOARDING 3. Standard onboarding
+    await pickFilesMenu(yargs);
+    await pickBlocksMenu();
   }
 
   // Run the main loop! Loops until we run the exit menu
   while (status !== "[exit]") {
-    status = await Main();
+    status = await Main(yargs);
 
     // Clear screen between runs of Main()
     if (status !== "[exit]") clearScreen();
@@ -86,7 +92,7 @@ export async function Run(status: AppStatus, yargs: Yargs = {}) {
  * 3. (optional) inspect the content of the blocks
  * 4. build the dotfiles
  */
-async function Main() {
+async function Main(yargs: Yargs = {}) {
   const hasSettings = existsSync(cache.path);
   await setTotalBlocks();
 
@@ -141,7 +147,7 @@ async function Main() {
 
   switch (choice) {
     case "pickFiles":
-      await pickFilesMenu();
+      await pickFilesMenu(yargs);
       break;
     case "pickBlocks":
       await pickBlocksMenu();
@@ -150,7 +156,8 @@ async function Main() {
       await inspectMenu();
       break;
     case "makeDotfiles":
-      await makeDotfilesMenu();
+      // do not auto-run, regardless of yargs
+      await makeDotfilesMenu({ auto: false });
       break;
     case "manageCache":
       await manageCacheMenu();
@@ -193,13 +200,16 @@ function getStatus() {
 
 // SUB MENUS
 
-async function pickFilesMenu() {
+async function pickFilesMenu(yargs: Yargs = {}) {
+  const validate = menuValidator<string>("select a dotfile source");
+
   const choice = await multiSelect({
     message: "Source Files",
     pageSize: 30,
     canToggleAll: true,
     loop: true,
     defaultValue: state.files,
+    validate,
     options: async (input) => {
       let matches = await globAsync(state.filter, {
         ignore: ["**/node_modules/**", "**/build/**"],
@@ -212,7 +222,7 @@ async function pickFilesMenu() {
         );
       }
       return matches.map((path) => ({
-        name: path,
+        name: yargs.demo ? path.replace(getDemoPath().dirname, "") : path,
         value: path,
       }));
     },

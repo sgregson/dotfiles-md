@@ -6,6 +6,7 @@ import { execa } from "execa";
 import tempWrite from "temp-write";
 
 import path from "path";
+import { fileURLToPath } from "url";
 import parseSentence from "minimist-string";
 import glob from "glob";
 
@@ -16,6 +17,7 @@ import remarkFrontmatter from "remark-frontmatter";
 import remarkGfm from "remark-gfm";
 import remarkFindReplace from "./remarkFindReplace.js";
 import { confirm } from "@inquirer/prompts";
+import { SelectOption } from "inquirer-select-pro";
 
 const env = dotenv.parse(
   await fsPromises
@@ -72,12 +74,33 @@ export const toMdAST = await unified()
     prefix: "%",
   });
 
+/******************
+ * Menu Stuff
+ */
 export const sleep = (ms: number) =>
   new Promise((resolve) => setTimeout(resolve, ms));
 
 export const clearScreen = () => {
   console.log("\u001b[2J\u001b[0;0H");
 };
+
+/** const validator = menuValidator("validation message")*/
+
+type Validator = <ValueType>(
+  msg?: string
+  // firstCheck?: never
+) => (values: ReadonlyArray<SelectOption<ValueType>>) => string | boolean;
+
+export const menuValidator: Validator =
+  (msg = "empty selection, select a value", firstCheck = true) =>
+  (values) => {
+    if (!values.length && firstCheck) {
+      firstCheck = false;
+      return `${msg} or press 'enter' to continue.`;
+    }
+
+    return true;
+  };
 
 /*************
  * File stuff
@@ -109,6 +132,11 @@ export const cache = {
   remove() {
     fs.unlinkSync(this.path);
   },
+};
+
+export const getDemoPath = () => {
+  const demoDirname = fileURLToPath(new URL("../demo/", import.meta.url));
+  return { dirname: demoDirname, filter: path.join(demoDirname, "**/*.md") };
 };
 
 /***************
