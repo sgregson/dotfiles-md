@@ -79,7 +79,7 @@ export const cache = {
     },
 };
 export const getDemoPath = () => {
-    const demoDirname = path.join(fileURLToPath(import.meta.url), "../demo/");
+    const demoDirname = path.join(fileURLToPath(import.meta.url), "./../demo/");
     console.log("demoDirname: ", demoDirname);
     return { dirname: demoDirname, filter: path.join(demoDirname, "**/*.md") };
 };
