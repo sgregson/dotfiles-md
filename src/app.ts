@@ -234,6 +234,8 @@ async function pickFilesMenu(yargs: Yargs = {}) {
 }
 
 async function pickBlocksMenu() {
+  const validate = menuValidator<Block>("pick a block");
+
   const choice = await multiSelect({
     message: "Choose Blocks",
     pageSize: 30,
@@ -241,6 +243,7 @@ async function pickBlocksMenu() {
     loop: true,
     defaultValue: state.blocks,
     equals: (a, b) => a.content === b.content,
+    validate,
     options: async (input) => {
       let matches = await getRunnableBlocks(state.files, {
         includeDisabled: true,
@@ -323,6 +326,7 @@ async function inspectMenu() {
 
 async function makeDotfilesMenu(yargs: Yargs = {}) {
   const isAuto = yargs?.dotfile && yargs?.auto;
+
   if (isAuto || (await confirm({ message: `Build ${getStatus()}?` }))) {
     console.log(`Building ${getStatus()}:`);
     const now = new Date().toISOString();

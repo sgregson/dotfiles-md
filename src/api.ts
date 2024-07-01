@@ -183,12 +183,12 @@ export async function getRunnableBlocks(
           // prettier-ignore
           switch (options?.action) {
             case "run":
-              label = `${options?.title ?? meta} ${colors.blue(options?.action??"")}:${lang}`;
+              label = `${options?.title ?? meta} (${colors.red(options?.action??"")}:${colors.underline(lang)})`;
               break;
             case "build":
             case "symlink":
             default:
-              label = `${options?.title ?? meta} ${colors.green(options?.action??"")}:${colors.underline(lang)} to ${options?.targetPath}`;
+              label = `${options?.title ?? meta} (${colors.green(options?.action??"")}:${colors.underline(lang)}) to ${options?.targetPath}`;
           }
 
           const theBlock: Block = {
