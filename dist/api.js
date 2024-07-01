@@ -5,6 +5,7 @@ import fs from "fs-extra";
 import { execa } from "execa";
 import tempWrite from "temp-write";
 import path from "path";
+import { fileURLToPath } from "url";
 import parseSentence from "minimist-string";
 import glob from "glob";
 import colors from "colors/safe.js";
@@ -32,9 +33,19 @@ export const toMdAST = await unified()
     replacements: Object.assign(Object.assign({}, env), { PLACEHOLDER: "derpy-do" }),
     prefix: "%",
 });
+/******************
+ * Menu Stuff
+ */
 export const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 export const clearScreen = () => {
     console.log("\u001b[2J\u001b[0;0H");
+};
+export const menuValidator = (msg = "empty selection, select a value", firstCheck = true) => (values) => {
+    if (!values.length && firstCheck) {
+        firstCheck = false;
+        return `${msg} or press 'enter' to continue.`;
+    }
+    return true;
 };
 /*************
  * File stuff
@@ -67,6 +78,10 @@ export const cache = {
         fs.unlinkSync(this.path);
     },
 };
+export const getDemoPath = () => {
+    const demoDirname = fileURLToPath(new URL("../demo/", import.meta.url));
+    return { dirname: demoDirname, filter: path.join(demoDirname, "**/*.md") };
+};
 /***************
  * Blocks
  */
@@ -97,12 +112,12 @@ export async function getRunnableBlocks(inputFiles, options) {
             // prettier-ignore
             switch (options === null || options === void 0 ? void 0 : options.action) {
                 case "run":
-                    label = `${(_a = options === null || options === void 0 ? void 0 : options.title) !== null && _a !== void 0 ? _a : meta} ${colors.blue((_b = options === null || options === void 0 ? void 0 : options.action) !== null && _b !== void 0 ? _b : "")}:${lang}`;
+                    label = `${(_a = options === null || options === void 0 ? void 0 : options.title) !== null && _a !== void 0 ? _a : meta} (${colors.red((_b = options === null || options === void 0 ? void 0 : options.action) !== null && _b !== void 0 ? _b : "")}:${colors.underline(lang)})`;
                     break;
                 case "build":
                 case "symlink":
                 default:
-                    label = `${(_c = options === null || options === void 0 ? void 0 : options.title) !== null && _c !== void 0 ? _c : meta} ${colors.green((_d = options === null || options === void 0 ? void 0 : options.action) !== null && _d !== void 0 ? _d : "")}:${colors.underline(lang)} to ${options === null || options === void 0 ? void 0 : options.targetPath}`;
+                    label = `${(_c = options === null || options === void 0 ? void 0 : options.title) !== null && _c !== void 0 ? _c : meta} (${colors.green((_d = options === null || options === void 0 ? void 0 : options.action) !== null && _d !== void 0 ? _d : "")}:${colors.underline(lang)}) to ${options === null || options === void 0 ? void 0 : options.targetPath}`;
             }
             const theBlock = {
                 lang,
@@ -126,24 +141,24 @@ export async function getRunnableBlocks(inputFiles, options) {
     return blocks;
 }
 export const executeBlock = (now) => async (block, i) => {
-    const { options, source, content, lang } = block;
+    const { options, content, lang } = block;
     const buildDir = path.join(process.cwd(), "build", now);
     let targetFile;
-    // NOTE: exit early if there's no action to be done
+    // BAIL - exit early if there's no action to be done
     if (!(options === null || options === void 0 ? void 0 : options.action)) {
         console.log(`↪ SKIPPED (no action) ${colors.reset(block.label)}`);
         return;
     }
-    if (options.action === "build" || options.action === "symlink") {
-        // BAIL if there's no target path to build/link to
-        if (!options.targetPath) {
-            console.log(`↪ SKIPPED (no targetPath) ${colors.reset(block.label)}`);
-            return;
-        }
-        targetFile = path.resolve(path.dirname(source), options.targetPath);
+    // the file goes to the target path from where dotfiles-md is run
+    if (options === null || options === void 0 ? void 0 : options.targetPath) {
+        targetFile = path.resolve(process.cwd(), options.targetPath);
     }
     switch (options === null || options === void 0 ? void 0 : options.action) {
         case "build":
+            if (!options.targetPath) {
+                console.log(`↪ SKIPPED (no targetPath) ${colors.reset(block.label)}`);
+                return;
+            }
             // make sure the folder is available before writing
             await fs.ensureFile(targetFile);
             await fs.writeFile(targetFile, content).then(() => {
@@ -151,6 +166,10 @@ export const executeBlock = (now) => async (block, i) => {
             });
             break;
         case "symlink":
+            if (!options.targetPath) {
+                console.log(`↪ SKIPPED (no targetPath) ${colors.reset(block.label)}`);
+                return;
+            }
             const buildFile = path.join(buildDir, "links", 
             // named for the originating file, with $i to dedupe multiple symlinks
             `${i}-${path.parse(targetFile).base}`);
