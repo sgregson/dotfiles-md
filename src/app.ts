@@ -24,7 +24,11 @@ type AppStatus =
   | "manageCache"
   | "[exit]";
 
-type Yargs = { [key: string]: unknown };
+type Yargs = {
+  auto?: boolean;
+  demo?: boolean;
+  [key: string]: unknown;
+};
 
 let state: State = {
   filter: "**/*.md",
@@ -208,7 +212,10 @@ async function pickFilesMenu(yargs: Yargs = {}) {
     validate,
     options: async (input) => {
       let matches = await globAsync(state.filter, {
-        ignore: ["**/node_modules/**", "**/build/**"],
+        ignore: ["**/build/**"].concat(
+          // generally ignore node_modules unless we're running in demo mode
+          yargs.demo ? ["**/node_modules/**"] : []
+        ),
       });
 
       if (input) {

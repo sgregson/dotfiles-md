@@ -138,8 +138,6 @@ export const getDemoPath = () => {
   const dirname = path.join(fileURLToPath(import.meta.url), "../../demo/");
   const filter = path.join(dirname, "**", "*.md");
 
-  console.log("dirname: ", dirname);
-  console.log("filter: ", filter);
   return { dirname, filter };
 };
 
