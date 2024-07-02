@@ -57,13 +57,17 @@ export async function Run(status: AppStatus, yargs: Yargs = {}) {
       console.log(`(file "${yargs.dotfile}" not found)`);
       await sleep(500);
     } else {
-      console.log(`(found ${theFile})`);
+      console.log(`${colors.green("✔")} found ${theFile}`);
       state.files = [theFile];
+
       state.blocks = await getRunnableBlocks(state.files, {
         includeDisabled: false,
       });
       await setTotalBlocks();
 
+      if (!yargs.auto) {
+        await pickBlocksMenu();
+      }
       await makeDotfilesMenu(yargs);
     }
   } else if (existsSync(cache.path)) {
@@ -268,7 +272,7 @@ async function pickBlocksMenu() {
               checked: state.blocks.some(
                 (selectedBlock) => selectedBlock.content === block.content
               ),
-              disabled: block.disabled ? block.disabled : false,
+              disabled: block.disabled,
             }
       );
     },

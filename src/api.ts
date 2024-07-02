@@ -53,7 +53,7 @@ export interface Block {
     disabled: string;
   }>;
   // if the block is disabled via options flags
-  disabled: string | false;
+  disabled: string | boolean;
   // derived label from title, meta or content
   label: string;
 }
@@ -390,6 +390,8 @@ export const executeBlock = (now: string) => async (block: Block, i) => {
  * disabled=true, when=os.darwin, when=os.win32
  */
 function isDisabled(options: Block["options"]) {
+  if (options?.action === "section") return true;
+
   // returns false or with a string containing the reason for being disabled
   if (options?.disabled) {
     return colors.red(

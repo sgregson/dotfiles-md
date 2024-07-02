@@ -27,12 +27,15 @@ export async function Run(status, yargs = {}) {
             await sleep(500);
         }
         else {
-            console.log(`(found ${theFile})`);
+            console.log(`${colors.green("✔")} found ${theFile}`);
             state.files = [theFile];
             state.blocks = await getRunnableBlocks(state.files, {
                 includeDisabled: false,
             });
             await setTotalBlocks();
+            if (!yargs.auto) {
+                await pickBlocksMenu();
+            }
             await makeDotfilesMenu(yargs);
         }
     }
@@ -205,7 +208,7 @@ async function pickBlocksMenu() {
                         name: block.label,
                         value: block,
                         checked: state.blocks.some((selectedBlock) => selectedBlock.content === block.content),
-                        disabled: block.disabled ? block.disabled : false,
+                        disabled: block.disabled,
                     };
             });
         },

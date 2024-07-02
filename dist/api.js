@@ -278,6 +278,8 @@ export const executeBlock = (now) => async (block, i) => {
  * disabled=true, when=os.darwin, when=os.win32
  */
 function isDisabled(options) {
+    if ((options === null || options === void 0 ? void 0 : options.action) === "section")
+        return true;
     // returns false or with a string containing the reason for being disabled
     if (options === null || options === void 0 ? void 0 : options.disabled) {
         return colors.red(options.disabled === "true" ? "(disabled)" : `(${options.disabled})`);
