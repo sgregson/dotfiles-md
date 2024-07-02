@@ -159,7 +159,7 @@ async function pickFilesMenu(yargs = {}) {
     const validate = menuValidator("select a dotfile source");
     const choice = await multiSelect({
         message: "Source Files",
-        pageSize: 30,
+        pageSize: process.stdout.rows - 3, // 3 rows for prompt, input, validation
         canToggleAll: true,
         loop: true,
         defaultValue: state.files,
@@ -188,7 +188,7 @@ async function pickBlocksMenu() {
     const validate = menuValidator("pick a block");
     const choice = await multiSelect({
         message: "Choose Blocks",
-        pageSize: 30,
+        pageSize: process.stdout.rows - 3, // 3 rows for prompt, input, validation
         canToggleAll: true,
         loop: true,
         defaultValue: state.blocks,
@@ -200,7 +200,7 @@ async function pickBlocksMenu() {
             });
             if (input) {
                 const inputLower = input.toLowerCase();
-                matches = matches.filter((block) => block.meta.toLowerCase().includes(inputLower));
+                matches = matches.filter((block) => colors.stripColors(block.label).toLowerCase().includes(inputLower));
             }
             return matches.map((block) => {
                 var _a;
@@ -223,7 +223,7 @@ async function inspectMenu() {
     // TODO: consider making this an "expand" menu
     const thePreview = await multiSelect({
         message: "Inspect Blocks",
-        pageSize: 30,
+        pageSize: process.stdout.rows - 3, // 3 rows for prompt, input, validation
         multiple: false,
         loop: true,
         equals: (a, b) => (a === null || a === void 0 ? void 0 : a.content) === (b === null || b === void 0 ? void 0 : b.content),
@@ -231,7 +231,7 @@ async function inspectMenu() {
             let matches = state.blocks;
             if (input) {
                 const inputLower = input.toLowerCase();
-                matches = matches.filter((block) => block.meta.toLowerCase().includes(inputLower));
+                matches = matches.filter((block) => colors.stripColors(block.label).toLowerCase().includes(inputLower));
             }
             return [
                 { name: "[back]", value: null },

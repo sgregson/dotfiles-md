@@ -212,7 +212,7 @@ async function pickFilesMenu(yargs: Yargs = {}) {
 
   const choice = await multiSelect({
     message: "Source Files",
-    pageSize: 30,
+    pageSize: process.stdout.rows - 3, // 3 rows for prompt, input, validation
     canToggleAll: true,
     loop: true,
     defaultValue: state.files,
@@ -248,7 +248,7 @@ async function pickBlocksMenu() {
 
   const choice = await multiSelect({
     message: "Choose Blocks",
-    pageSize: 30,
+    pageSize: process.stdout.rows - 3, // 3 rows for prompt, input, validation
     canToggleAll: true,
     loop: true,
     defaultValue: state.blocks,
@@ -262,7 +262,7 @@ async function pickBlocksMenu() {
       if (input) {
         const inputLower = input.toLowerCase();
         matches = matches.filter((block) =>
-          block.meta.toLowerCase().includes(inputLower)
+          colors.stripColors(block.label).toLowerCase().includes(inputLower)
         );
       }
 
@@ -288,7 +288,7 @@ async function inspectMenu() {
   // TODO: consider making this an "expand" menu
   const thePreview = await multiSelect<Block | null, false>({
     message: "Inspect Blocks",
-    pageSize: 30,
+    pageSize: process.stdout.rows - 3, // 3 rows for prompt, input, validation
     multiple: false,
     loop: true,
     equals: (a, b) => a?.content === b?.content,
@@ -298,7 +298,7 @@ async function inspectMenu() {
       if (input) {
         const inputLower = input.toLowerCase();
         matches = matches.filter((block) =>
-          block.meta.toLowerCase().includes(inputLower)
+          colors.stripColors(block.label).toLowerCase().includes(inputLower)
         );
       }
 
