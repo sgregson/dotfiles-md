@@ -151,9 +151,7 @@ alias zln='zmv -L'
 
 #### Non-interactive shells (.zprofile)
 
-The profile file for non-interactive terminal windows.
-
-Generally, only put the things in here you'd want to have available to scripts (not open terminal windows)
+The profile file for non-interactive terminal windows. Generally, only put the things in here you'd want to have available to scripts (not open terminal windows)
 
 ```sh $HOME/.zprofile action=symlink title=zprofile
 export PATH="$PATH:$(python3 -m site --user-base)/bin"
@@ -226,7 +224,7 @@ pinentry-program /opt/homebrew/bin/pinentry-mac
 
 From [pinentry-touchid](https://github.com/jorgelbg/pinentry-touchid) I don't want to save my passphrase in keychain:
 
-```sh action=run title="Disable Save GPG To Keychain" disabled=true
+```sh action=run title="Disable Save GPG To Keychain"
 defaults write org.gpgtools.common DisableKeychain -bool yes;
 ```
 
@@ -253,7 +251,7 @@ alias jfdi="pushd ~/Code/dotfiles-md/ && yarn jfdi && popd"
 # brew tap caskroom/fonts;
 brew tap homebrew/bundle;
 brew tap ikuwow/imgcat;
-brew tap joeyhoer/extras;
+# brew tap joeyhoer/extras;                   # 💀 appears dead
 brew tap mapbox/cli;
 brew tap welldan97/whereami;
 ```
@@ -264,39 +262,39 @@ brew install asdf;
 brew install bk;
 brew install deno;
 brew install fzf;
-brew install gitleaks; #secret scanning for git repos
-brew install gh;       # github CLI
+brew install gitleaks;                        # secret scanning for git repos
+brew install gh;                              # github CLI
 brew install imgcat;
-brew install jppoeyhoer/extras/gzthermal;
+# brew install jppoeyhoer/extras/gzthermal;   # 💀 appears dead
 brew install jq;
 # brew install jrnl;
 # brew install kryptco/tap/kr
 brew install mapbox/cli/mapbox;
 brew install meetingbar;
 # brew install mr;
-# brew install pinentry-mac; # GPG Pinentry command
-brew install rbenv;
-brew install spark;
+# brew install pinentry-mac;                  # GPG Pinentry command
+# brew install rbenv;                         # replaced by asdf
+brew install spark;                           # sparklines ▁▁▂▃▄▅▆▇█ in terminal
 brew install whereami;
 # brew install zsh;
 brew install zsh-completions;
 ```
 
 ```sh action=run title="Homebrew casks" when=os.darwin
-brew install --cask 1password/tap/1password-cli;
+brew install --cask 1password-cli;            # secrets and password management
 brew install --cask alfred;
-brew install --cask cleanshot;
-brew install --cask daisydisk;
+brew install --cask cleanshot;                # great screenshot tool
+brew install --cask daisydisk;                # storage analysis
 brew install --cask discord;
 brew install --cask dropbox;
 brew install --cask firefox@developer-edition;
 brew install --cask fluid;
-brew install --cask flux;
+# brew install --cask flux;                   # 💤 not needed (mac does this automatically now)
 brew install --cask font-fira-code;
 brew install --cask google-chrome;
 brew install --cask google-cloud-sdk;
 brew install --cask google-drive;
-# brew install --cask hiddenbar; # collapsible macos menubar
+# brew install --cask hiddenbar;              # collapsible macos menubar
 brew install --cask numi;
 brew install --cask phoenix;
 brew install --cask processing;
@@ -304,10 +302,8 @@ brew install --cask qlmarkdown
 brew install --cask slack;
 brew install --cask spotify;
 # brew install --cask steam;
-# unnaturalscrollwheels is generally more reliable than scroll-reverser
-brew install --cask unnaturalscrollwheels; 
+brew install --cask unnaturalscrollwheels;    # generally more reliable than scroll-reverser
 brew install --cask visual-studio-code;
-
 ```
 
 ```sh $HOME/.custom/gcloud-brew.sh action=symlink title=gcloud-completions when=os.darwin
@@ -699,7 +695,7 @@ Preview markdown files in MacOS quicklook (finder spacebar) https://github.com/s
 > TODO: need to implement dark color scheme `prefers-color-scheme: dark`
 
 <!-- prettier-ignore -->
-```css $HOME/mdqlstyle.css action=symlink title=stylesheet
+```css $HOME/qlmarkdown-style.css action=symlink title="QLMarkdown stylesheet"
 html,body{color:black}
 *{margin:0;padding:0}
 body{font:13.34px helvetica,arial,freesans,clean,sans-serif;-webkit-font-smoothing:antialiased;line-height:1.4;padding:30px;background:#fff;border-radius:3px;-moz-border-radius:3px;-webkit-border-radius:3px;max-width:900px;margin:15px auto;border:3px solid #eee!important}
