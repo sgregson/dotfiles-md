@@ -6,14 +6,15 @@ A bunch of markdown files which generally follow two conventions:
 - anything that is `action=build`, I direct to `$HOME/.custom/` folder
   - That's basically for ease of access from other files (check out loading them in the zshrc block of [zsh/zsh.md](./shell/zsh.md))
 
-```txt action=section title="Spencerʼs Dotfiles"
+```md action=section
+Spencerʼs Dotfiles
 ```
 
 ## shell
 
 Load node versions automatically based on directory
 
-```sh $HOME/.custom/fnm.sh action=symlink title="fnm nodejs loader"
+```sh $HOME/.custom/fnm.sh action=symlink title="use fnm on directory change"
 echo "...using fnm ($1)"
 eval "$(fnm env --use-on-cd)"
 ```
@@ -125,130 +126,6 @@ if [ -d "$HOME/Library/Application Support/Sublime Text 3/" ]; then
 fi
 ```
 
-### ZSH Config
-
-```txt action=section title="# ZSH CONFIG"
-```
-
-```sh $HOME/.custom/glob.sh action=symlink title="ZSH extended globbing"
-#! /bin/zsh
-# Permit ZSH extended globbing
-# only include in interactive shells (zshrc) - https://unix.stackexchange.com/questions/431805/zsh-is-there-a-problem-with-always-enabling-extended-glob
-setopt extended_glob
-```
-
-```sh $HOME/.custom/zmv.sh action=symlink title="use ZMV for bulk renaming"
-# Dry Run:$ zmv -n 'Page(*)/shot.jpg' 'shot-${1}.jpg'
-# Actual: $ zmv 'Page(*)/shot.jpg' 'shot-${1}.jpg'
-autoload zmv
-alias mmv='noglob zmv -W'
-alias zcp='zmv -C'
-alias zln='zmv -L'
-```
-
-#### Shared Environment (.zshenv)
-
-```sh $HOME/.zshenv action=symlink title=zshenv
-# install nvm on first run,
-# probably not a good idea to do here
-# source $HOME/.custom/fnm.sh 'zshenv' TODO: can't load since homebrew hasn't loaded yet
-```
-
-#### Non-interactive shells (.zprofile)
-
-The profile file for non-interactive terminal windows. Generally, only put the things in here you'd want to have available to scripts (not open terminal windows)
-
-```sh $HOME/.zprofile action=symlink title=zprofile
-export PATH="$PATH:$(python3 -m site --user-base)/bin"
-export PATH="$(yarn global bin):$PATH"
-
-# Add Visual Studio Code (code)
-export PATH="$PATH":"/Applications/Visual Studio Code.app/Contents/Resources/app/bin"
-
-# Enable rbenv for sublime plugins (linting)
-# export PATH="$HOME/.rbenv/bin:$PATH"
-# eval "$(rbenv init -)"
-
-# Set PATH, MANPATH, etc., for Homebrew.
-# /Users/sgregson/.zprofile:7: no such file or directory: /opt/homebrew/bin/brew
-# eval "$(/usr/local/bin/brew shellenv)"
-eval "$(/opt/homebrew/bin/brew shellenv)"
-
-
-# Enable NVM for sublime plugins
-# source $HOME/.custom/nvm.sh 'zprofile'
-source $HOME/.custom/fnm.sh 'zprofile'
-```
-
-#### Login Shells(.zshrc)
-
-```sh $HOME/.zshrc action=symlink title=zshrc
-# User Config (references to other dotfiles)
-# source $HOME/.custom/omz.sh TODO: 2024-05-16 no longer using omz
-source $HOME/.custom/aliases.sh
-source $HOME/.custom/env.sh
-source $HOME/.custom/zmv.sh
-source $HOME/.custom/glob.sh
-source $HOME/.custom/gcloud-brew.sh
-# source $HOME/.custom/wayfair.sh TODO: 2024-05-16 no longer using omz
-
-export GPG_TTY=$(tty)
-
-# echo "nvm $(nvm --version) (run 'nvm use stable')" TODO: 2024-05-16 no longer using nvm
-echo "fnm $(fnm current)"
-
-## source fuzzy find completions for zsh
-source <(fzf --zsh)
-
-# load ASDF tool
-source "$(brew --prefix asdf)/libexec/asdf.sh"
-
-## Support yarn global binaries
-export PATH="$(yarn global bin):$PATH"
-```
-
-### GPG
-
-https://docs.github.com/en/authentication/managing-commit-signature-verification/checking-for-existing-gpg-keys
-
-Basically download the binary from https://www.gnupg.org/download/ and then import your private key onto your new machine `gpg --import private.key`.
-
-Then Tell git about it with:
-
-```sh
-git config --global --unset gpg.format
-gpg --list-secret-keys --keyid-format=long
-git config --global user.signingkey #############
-```
-
-Remember to kill gpg-agent if you change the pinentry program (with `gpgconf --kill gpg-agent`).
-
-```ini $HOME/.gnupg/gpg-agent.conf action=symlink title="Associate pinentry-mac"
-pinentry-program /opt/homebrew/bin/pinentry-mac
-```
-
-From [pinentry-touchid](https://github.com/jorgelbg/pinentry-touchid) I don't want to save my passphrase in keychain:
-
-```sh action=run title="Disable Save GPG To Keychain"
-defaults write org.gpgtools.common DisableKeychain -bool yes;
-```
-
-
-### Aliases
-`gs` and `gdc` are in daily use
-
-```sh $HOME/.custom/aliases.sh action=symlink title="Shell Aliases, git etc"
-alias g="git"
-alias gf="git fetch"
-# alias go="git checkout"
-alias gs="git status"
-alias gd="git diff"
-alias gdc="git diff --cached"
-# alias squash="git merge --squash"
-
-alias jfdi="pushd ~/Code/dotfiles-md/ && yarn jfdi && popd"
-```
-
 ## Homebrew
 
 ```sh action=run title="Homebrew taps" when=os.darwin
@@ -312,25 +189,115 @@ brew install --cask unnaturalscrollwheels;    # generally more reliable than scr
 brew install --cask visual-studio-code;
 ```
 
-```sh $HOME/.custom/gcloud-brew.sh action=symlink title=gcloud-completions when=os.darwin
+```sh $HOME/.custom/gcloud-brew.sh action=symlink title="google cloud sdk completions" when=os.darwin
 source "$(brew --prefix)/share/google-cloud-sdk/path.zsh.inc"
 source "$(brew --prefix)/share/google-cloud-sdk/completion.zsh.inc"
 ```
 
+### ZSH Config
+
+```md action=section
+# ZSH CONFIG
+```
+
+```sh $HOME/.custom/glob.sh action=symlink title="ZSH extended globbing"
+#! /bin/zsh
+# Permit ZSH extended globbing
+# only include in interactive shells (zshrc) - https://unix.stackexchange.com/questions/431805/zsh-is-there-a-problem-with-always-enabling-extended-glob
+setopt extended_glob
+```
+
+```sh $HOME/.custom/zmv.sh action=symlink title="use ZMV for bulk renaming"
+# Dry Run:$ zmv -n 'Page(*)/shot.jpg' 'shot-${1}.jpg'
+# Actual: $ zmv 'Page(*)/shot.jpg' 'shot-${1}.jpg'
+autoload zmv
+alias mmv='noglob zmv -W'
+alias zcp='zmv -C'
+alias zln='zmv -L'
+```
+
+#### Shared Environment (.zshenv)
+
+```sh $HOME/.zshenv action=symlink title=zshenv
+# install nvm on first run,
+# probably not a good idea to do here
+# source $HOME/.custom/fnm.sh 'zshenv' TODO: can't load since homebrew hasn't loaded yet
+```
+
+#### Non-interactive shells (.zprofile)
+
+The profile file for non-interactive terminal windows. Generally, only put the things in here you'd want to have available to scripts (not open terminal windows)
+
+```sh $HOME/.zprofile action=symlink title=zprofile
+export PATH="$PATH:$(python3 -m site --user-base)/bin"
+export PATH="$(yarn global bin):$PATH"
+
+# Add Visual Studio Code (code)
+export PATH="$PATH":"/Applications/Visual Studio Code.app/Contents/Resources/app/bin"
+
+# Enable rbenv for sublime plugins (linting)
+# export PATH="$HOME/.rbenv/bin:$PATH"
+# eval "$(rbenv init -)"
+
+# Set PATH, MANPATH, etc., for Homebrew.
+# /Users/sgregson/.zprofile:7: no such file or directory: /opt/homebrew/bin/brew
+# eval "$(/usr/local/bin/brew shellenv)"
+eval "$(/opt/homebrew/bin/brew shellenv)"
+
+
+# Enable NVM for sublime plugins
+# source $HOME/.custom/nvm.sh 'zprofile'
+source $HOME/.custom/fnm.sh 'zprofile'
+```
+
+#### Login Shells(.zshrc)
+
+```sh $HOME/.zshrc action=symlink title=zshrc
+# User Config (references to other dotfiles)
+source $HOME/.custom/aliases.sh
+source $HOME/.custom/env.sh
+source $HOME/.custom/zmv.sh
+source $HOME/.custom/glob.sh
+source $HOME/.custom/gcloud-brew.sh
+
+export GPG_TTY=$(tty)
+
+echo "fnm $(fnm current)"
+
+## source fuzzy find completions for zsh
+source <(fzf --zsh)
+
+# load ASDF tool
+source "$(brew --prefix asdf)/libexec/asdf.sh"
+
+## Support yarn global binaries
+export PATH="$(yarn global bin):$PATH"
+```
+
+
+### Aliases
+`gs` and `gdc` are in daily use
+
+```sh $HOME/.custom/aliases.sh action=symlink title="Shell Aliases, git etc"
+alias g="git"
+alias gf="git fetch"
+# alias go="git checkout"
+alias gs="git status"
+alias gd="git diff"
+alias gdc="git diff --cached"
+# alias squash="git merge --squash"
+
+alias jfdi="pushd ~/Code/dotfiles-md/ && yarn jfdi && popd"
+```
+
 ## git
-```txt action=section title="# Git"
+```md action=section
+# Git
 ```
 
 ### Global gitconfig
 
-```ini $HOME/.gitconfig-csnzoo action=build title="Wayfair Gitconfig" disabled=legacy
-[user]
-  name = Spencer Gregson
-  email = sgregson@wayfair.com
-  signingkey = 376AA48582F8ADAFA44B47A1FB5A1923EFF83E21
-```
-
-```ini $HOME/.gitconfig action=symlink title="Global Gitconfig"
+```ini $HOME/.gitconfig action=symlink title="global gitconfig"
 [init]
   templatedir = ~/.git-templates
 [user]
@@ -475,6 +442,13 @@ source "$(brew --prefix)/share/google-cloud-sdk/completion.zsh.inc"
   open-pt         = "! pt=$(git rev-parse --abbrev-ref HEAD | rev | cut -d'_' -f 1 | rev); open \"https://admin.wayfair.com/tracker/views/142.php?PrtID=$pt\""
 ```
 
+```ini $HOME/.gitconfig-csnzoo action=build title="Wayfair Gitconfig" disabled=legacy
+[user]
+  name = Spencer Gregson
+  email = sgregson@wayfair.com
+  signingkey = 376AA48582F8ADAFA44B47A1FB5A1923EFF83E21
+```
+
 ### Global gitignore
 
 ```sh $HOME/.gitignore action=symlink title="global gitignore"
@@ -487,11 +461,11 @@ desktop.ini
 ```
 
 
-### Git Stats (disabled)
+### Git Stats
 
 You can use https://github.com/IonicaBizau/git-stats to keep track of your git stats locally...
 
-```sh action=null disabled=true
+```sh
 npm i -g git-stats
 ```
 
@@ -509,7 +483,30 @@ module.exports = {
   global_activity: false,
 };
 ```
+### GPG
 
+> https://docs.github.com/en/authentication/managing-commit-signature-verification/checking-for-existing-gpg-keys
+
+Basically download the binary from https://www.gnupg.org/download/ and then import your private key onto your new machine `gpg --import private.key`.
+
+Then tell git about it with:
+
+```sh
+git config --global --unset gpg.format
+gpg --list-secret-keys --keyid-format=long
+git config --global user.signingkey #############
+```
+From [pinentry-touchid](https://github.com/jorgelbg/pinentry-touchid) I don't want to save my GPG key in keychain:
+
+```sh action=run title="Disable Save GPG To Keychain"
+defaults write org.gpgtools.common DisableKeychain -bool yes;
+```
+
+Remember to kill gpg-agent if you change the pinentry program (with `gpgconf --kill gpg-agent`).
+
+```ini $HOME/.gnupg/gpg-agent.conf action=symlink title="Use pinentry-mac for GPG"
+pinentry-program /opt/homebrew/bin/pinentry-mac
+```
 
 ## SSH
 
@@ -527,14 +524,15 @@ Host *.wf-gcp-us-sds-prod.internal
   # ForwardAgent yes
   # ServerAliveInterval 240
 
-
 Host *
     IdentityAgent "~/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock"
 ```
 
 
 ## App Configs
-```txt action=section title="# App Configurations"
+
+```md action=section
+# App Configurations
 ```
 
 ### Git stats
@@ -891,7 +889,8 @@ reloadTabs() {
 ```
 
 ## MacOS System Config
-```txt action=section title="# MacOS System"
+```md action=section
+# MacOS System
 ```
 
 ```sh title="MacOS Key Repeat" action=run when=os.darwin
