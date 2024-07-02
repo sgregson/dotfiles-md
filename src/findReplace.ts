@@ -8,6 +8,9 @@ interface Options {
 export const findReplace = (options: Options) => (str: string) => {
   const { replacements = {}, prefix = "%" } = options;
 
+  // bail if we have no replacements, otherwise we match to an empty regexp
+  if (Object.keys(replacements).length === 0) return str;
+
   // Attaches prefix to the start of the string.
   const attachPrefix = (str) => (prefix || "") + str;
 
