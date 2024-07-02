@@ -24,7 +24,7 @@
     "darwin"
   ],
   "scripts": {
-    "prerelease": "find . -path './node_modules' -prune -o -type l -print",
+    "prerelease": "! find . -path './node_modules' -prune -o -type l -print | grep .",
     "release": "np",
     "prejfdi": "yarn",
     "jfdi": "cd dotfiles; npx .. --auto README.md; cd -",
