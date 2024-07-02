@@ -259,14 +259,18 @@ async function pickBlocksMenu() {
         );
       }
 
-      return matches.map((block) => ({
-        name: block.label,
-        value: block,
-        checked: state.blocks.some(
-          (selectedBlock) => selectedBlock.content === block.content
-        ),
-        disabled: block.disabled ? `(${block.disabled})` : false,
-      }));
+      return matches.map((block) =>
+        block.options?.action === "section"
+          ? new Separator(block.label)
+          : {
+              name: block.label,
+              value: block,
+              checked: state.blocks.some(
+                (selectedBlock) => selectedBlock.content === block.content
+              ),
+              disabled: block.disabled ? block.disabled : false,
+            }
+      );
     },
   });
 

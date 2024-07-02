@@ -6,6 +6,8 @@ A bunch of markdown files which generally follow two conventions:
 - anything that is `action=build`, I direct to `$HOME/.custom/` folder
   - That's basically for ease of access from other files (check out loading them in the zshrc block of [zsh/zsh.md](./shell/zsh.md))
 
+```txt action=section title="Spencerʼs Dotfiles"
+```
 
 ## shell
 
@@ -16,7 +18,7 @@ echo "...using fnm ($1)"
 eval "$(fnm env --use-on-cd)"
 ```
 
-```sh $HOME/.custom/nvm.sh action=symlink title="nvm loader" disabled=true
+```sh $HOME/.custom/nvm.sh action=symlink title="nvm loader" disabled="use fnm"
 # source $HOME/.custom/nvm.sh 'callsite'
 if [ -d ~/.nvm/ ]; then
 # load NVM
@@ -101,7 +103,7 @@ add-zsh-hook chpwd auto-switch-node-version
 auto-switch-node-version
 ```
 
-```sh $HOME/.custom/wayfair.sh action=symlink title="wayfair shell aliases" disabled=true
+```sh $HOME/.custom/wayfair.sh action=symlink title="wayfair shell aliases" disabled="legacy"
 #! /bin/zsh
 
 alias wayproxy="docker run --rm -p 443:443 -v ~/.local-certs:/certs wayfair/local-https-proxy"
@@ -124,6 +126,9 @@ fi
 ```
 
 ### ZSH Config
+
+```txt action=section title="# ZSH CONFIG"
+```
 
 ```sh $HOME/.custom/glob.sh action=symlink title="ZSH extended globbing"
 #! /bin/zsh
@@ -313,10 +318,12 @@ source "$(brew --prefix)/share/google-cloud-sdk/completion.zsh.inc"
 ```
 
 ## git
+```txt action=section title="# Git"
+```
 
 ### Global gitconfig
 
-```ini $HOME/.gitconfig-csnzoo action=build title="Wayfair Gitconfig" disabled=true
+```ini $HOME/.gitconfig-csnzoo action=build title="Wayfair Gitconfig" disabled=legacy
 [user]
   name = Spencer Gregson
   email = sgregson@wayfair.com
@@ -525,36 +532,16 @@ Host *
     IdentityAgent "~/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock"
 ```
 
-## dev config
-
-### Prettier
-
-### Eslint
-
-### SCSS
-
-```yaml $HOME/.stylelintrc action=symlink title=global-stylelint
-# SCSS Linting rules, uses stylelint
-#
-# Rules are sorted alphabetcally,
-#   comment out any unused rules so we don't have to go hunting later
-
-defaultSeverity: warning
-# plugins:
-# - stylelint-scss
-rules:
-  selector-nested-pattern:
-    - "^[^\\.][^A-Z].*$" # TODO ??
-    - severity: error
-```
-
 
 ## App Configs
+```txt action=section title="# App Configurations"
+```
 
 ### Git stats
 
 ### Hyper
-```js $HOME/hyper.js action=symlink
+
+```js $HOME/hyper.js title="Hyper terminal settings" action=symlink disabled="use warp terminal"
 module.exports = {
   config: {
     // default font size in pixels for all tabs
@@ -675,7 +662,7 @@ module.exports = {
 
 ### Jrnl
 
-```yaml $HOME/.config/jrnl/jrnl.yaml action=build
+```yaml $HOME/.config/jrnl/jrnl.yaml title="JRNL command line settings" action=build disabled=legacy
 - default_hour: 9
 - linewrap: 79
 - encrypt: false
@@ -695,8 +682,7 @@ Preview markdown files in MacOS quicklook (finder spacebar) https://github.com/s
 
 > TODO: need to implement dark color scheme `prefers-color-scheme: dark`
 
-<!-- prettier-ignore -->
-```css $HOME/qlmarkdown-style.css action=symlink title="QLMarkdown stylesheet"
+```css $HOME/qlmarkdown-style.css action=symlink title="Markdown QuickLook styles"
 html,body{color:black}
 *{margin:0;padding:0}
 body{font:13.34px helvetica,arial,freesans,clean,sans-serif;-webkit-font-smoothing:antialiased;line-height:1.4;padding:30px;background:#fff;border-radius:3px;-moz-border-radius:3px;-webkit-border-radius:3px;max-width:900px;margin:15px auto;border:3px solid #eee!important}
@@ -846,13 +832,36 @@ Vim editor settings
 :syntax enable
 ```
 
+## dev config
+
+### Prettier
+
+### Eslint
+
+### SCSS
+
+```yaml $HOME/.stylelintrc action=symlink title="Stylelint global config"
+# SCSS Linting rules, uses stylelint
+#
+# Rules are sorted alphabetcally,
+#   comment out any unused rules so we don't have to go hunting later
+
+defaultSeverity: warning
+# plugins:
+# - stylelint-scss
+rules:
+  selector-nested-pattern:
+    - "^[^\\.][^A-Z].*$" # TODO ??
+    - severity: error
+```
+
 ## Misc
 
 ### reloadTabs()
 
 > Call this function to reload any browser tab (chrome) on a matching domain. Useful when paired with utilities like `nodemon` when you don't have hot module reloading
 
-```sh $HOME/.custom/reloadTabs action=symlink title=reloadTabs-function when=os.darwin
+```sh $HOME/.custom/reloadTabs action=symlink title="reloadTabs() command line function" when=os.darwin disabled=legacy
 # Reload Chrome tabs in background for matching $1 string
 # https://gist.github.com/badsyntax/1f4a58715194d780b2f6
 # Usage: reloadTabs "wayfair.com" will do browsersync for all wayfair tabs (based on turbine events)
@@ -882,6 +891,8 @@ reloadTabs() {
 ```
 
 ## MacOS System Config
+```txt action=section title="# MacOS System"
+```
 
 ```sh title="MacOS Key Repeat" action=run when=os.darwin
 # Disable press-and-hold for keys in favor of key repeat.
@@ -893,7 +904,7 @@ defaults write NSGlobalDomain KeyRepeat -int 1;
 
 ### Keyboard setup
 
-```sh title=Finder action=run when=os.darwin
+```sh title="Finder Settings" action=run when=os.darwin
 # Use AirDrop over every interface. srsly this should be a default.
 defaults write com.apple.NetworkBrowser BrowseAllInterfaces 1;
 
@@ -908,7 +919,7 @@ defaults write com.apple.finder ShowExternalHardDrivesOnDesktop -bool true;
 defaults write com.apple.finder ShowRemovableMediaOnDesktop -bool true;
 ```
 
-```sh title=hot-corners action=run when=os.darwin
+```sh title="Hot Corners" action=run when=os.darwin
 # Run the screensaver if we're in the bottom-left hot corner.
 defaults write com.apple.dock wvous-bl-corner -int 5;
 defaults write com.apple.dock wvous-bl-modifier -int 0;
@@ -916,10 +927,12 @@ defaults write com.apple.dock wvous-bl-modifier -int 0;
 
 ### Safari browser defaults
 
-```sh title=safari-setup action=run when=os.darwin
+```sh title="Hide Safari bookmarks bar" action=run when=os.darwin
 # Hide Safari's bookmark bar.
 defaults write com.apple.Safari ShowFavoritesBar -bool false;
+```
 
+```sh title="Safari Developer settings" action=run when=os.darwin
 # Set up Safari for development.
 defaults write com.apple.Safari IncludeInternalDebugMenu -bool true;
 defaults write com.apple.Safari IncludeDevelopMenu -bool true;

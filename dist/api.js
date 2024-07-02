@@ -99,7 +99,7 @@ export async function getRunnableBlocks(inputFiles, options) {
         blocks = blocks.concat(theDoc.children
             .filter(({ type }) => type === "code")
             .map(({ lang, meta, value }) => {
-            var _a, _b, _c, _d;
+            var _a, _b, _c, _d, _e;
             const options = Object.fromEntries(
             // minimist parses unknown args into an unknown "_" key
             // and all args we have are technically unknown
@@ -116,13 +116,18 @@ export async function getRunnableBlocks(inputFiles, options) {
             let label = "";
             // prettier-ignore
             switch (options === null || options === void 0 ? void 0 : options.action) {
+                case "section":
+                    label = colors.underline(value !== null && value !== void 0 ? value : meta);
+                    break;
                 case "run":
                     label = `${(_a = options === null || options === void 0 ? void 0 : options.title) !== null && _a !== void 0 ? _a : meta} (${colors.red((_b = options === null || options === void 0 ? void 0 : options.action) !== null && _b !== void 0 ? _b : "")}:${colors.underline(lang)})`;
                     break;
                 case "build":
                 case "symlink":
                 default:
-                    label = `${(_c = options === null || options === void 0 ? void 0 : options.title) !== null && _c !== void 0 ? _c : meta} (${colors.green((_d = options === null || options === void 0 ? void 0 : options.action) !== null && _d !== void 0 ? _d : "")}:${colors.underline(lang)}) to ${options === null || options === void 0 ? void 0 : options.targetPath}`;
+                    label = `${(_c = options === null || options === void 0 ? void 0 : options.title) !== null && _c !== void 0 ? _c : meta} `
+                        + `(${colors.green((_d = options === null || options === void 0 ? void 0 : options.action) !== null && _d !== void 0 ? _d : "")}:${colors.underline(lang)})`
+                        + ` -> ${(_e = options.targetPath) === null || _e === void 0 ? void 0 : _e.replace(homeDirectory, "~")}`;
             }
             const theBlock = {
                 lang,
@@ -265,17 +270,18 @@ export const executeBlock = (now) => async (block, i) => {
  */
 function isDisabled(options) {
     // returns false or with a string containing the reason for being disabled
-    if (options === null || options === void 0 ? void 0 : options.disabled)
-        return colors.red("disabled=true");
+    if (options === null || options === void 0 ? void 0 : options.disabled) {
+        return colors.red(options.disabled === "true" ? "(disabled)" : `(${options.disabled})`);
+    }
     if (options === null || options === void 0 ? void 0 : options.when) {
         switch (options.when) {
             case "os.darwin":
                 return os.platform() !== "darwin"
-                    ? colors.yellow("when!=os.darwin")
+                    ? colors.yellow("(when!=os.darwin)")
                     : false;
             case "os.win32":
                 return os.platform() !== "win32"
-                    ? colors.yellow("when!=os.win32")
+                    ? colors.yellow("(when!=os.win32)")
                     : false;
             default:
                 break;

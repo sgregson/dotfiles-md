@@ -65,16 +65,17 @@ A **`[filePath]` option** may be provided in order to direct the output of the c
 
 The **`[...options]` array** is a space-delimited list of `key=value` directives defining how the CLI should act on this code block. Values must be quoted if they contain spaces as in, `key="Some Value"`.
 
-**Codeblock Options (and actions)**
+**Codeblock Options and Actions**
 
-- `title=<string>` a title for the code block to appear in the CLI. `<string>` must be quoted if it contains spaces.
 - `action` defines what to do with the content:
   - `=build`: build the file to `[filePath]`, replacing content as appropriate
+  - `=run`: run this code block according to the file syntax (js: node, sh, bash, zsh)
   - `=symlink`: find-replace patterns (`%...`) in the codeblock and symlink the result (from `/build`) to `[filePath]`
-  - `=run`: run this code block according to the file syntax (js: node, sh: bash, zsh)
+  - `=section`: use the contents of the code block as a section divider in the CLI
+- `title=<string>` a title for the code block to appear in the CLI. `<string>` must be quoted if it contains spaces.
 - `when` defines the availability of this codeblock
   - `=os.darwin`, `=os.win32`: platform-specific dotfiles
-- `disabled=true` prevent a block from being run (helpful for migrations)
+- `disabled=<string>`: prevent a block code block from being runnable. The `<string>` is displayed in the UI.
 
 ## Contributing
 

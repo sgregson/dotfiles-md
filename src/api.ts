@@ -46,11 +46,11 @@ export interface Block {
   source: string;
   // parsed options of the meta block
   options?: Partial<{
-    action: "build" | "symlink" | "run";
+    action: "build" | "symlink" | "run" | "section";
     targetPath: string;
     title: string;
     when: string;
-    disabled: boolean;
+    disabled: string;
   }>;
   // if the block is disabled via options flags
   disabled: string | false;
@@ -188,13 +188,18 @@ export async function getRunnableBlocks(
           let label = "";
           // prettier-ignore
           switch (options?.action) {
+            case "section":
+              label = colors.underline(value ?? meta);
+              break
             case "run":
               label = `${options?.title ?? meta} (${colors.red(options?.action??"")}:${colors.underline(lang)})`;
               break;
             case "build":
             case "symlink":
             default:
-              label = `${options?.title ?? meta} (${colors.green(options?.action??"")}:${colors.underline(lang)}) to ${options?.targetPath}`;
+              label = `${options?.title ?? meta} `
+                    + `(${colors.green(options?.action??"")}:${colors.underline(lang)})`
+                    + ` -> ${options.targetPath?.replace(homeDirectory, "~")}`;
           }
 
           const theBlock: Block = {
@@ -376,17 +381,21 @@ export const executeBlock = (now: string) => async (block: Block, i) => {
  */
 function isDisabled(options: Block["options"]) {
   // returns false or with a string containing the reason for being disabled
-  if (options?.disabled) return colors.red("disabled=true");
+  if (options?.disabled) {
+    return colors.red(
+      options.disabled === "true" ? "(disabled)" : `(${options.disabled})`
+    );
+  }
 
   if (options?.when) {
     switch (options.when) {
       case "os.darwin":
         return os.platform() !== "darwin"
-          ? colors.yellow("when!=os.darwin")
+          ? colors.yellow("(when!=os.darwin)")
           : false;
       case "os.win32":
         return os.platform() !== "win32"
-          ? colors.yellow("when!=os.win32")
+          ? colors.yellow("(when!=os.win32)")
           : false;
       default:
         break;

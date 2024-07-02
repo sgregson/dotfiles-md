@@ -197,12 +197,17 @@ async function pickBlocksMenu() {
                 const inputLower = input.toLowerCase();
                 matches = matches.filter((block) => block.meta.toLowerCase().includes(inputLower));
             }
-            return matches.map((block) => ({
-                name: block.label,
-                value: block,
-                checked: state.blocks.some((selectedBlock) => selectedBlock.content === block.content),
-                disabled: block.disabled ? `(${block.disabled})` : false,
-            }));
+            return matches.map((block) => {
+                var _a;
+                return ((_a = block.options) === null || _a === void 0 ? void 0 : _a.action) === "section"
+                    ? new Separator(block.label)
+                    : {
+                        name: block.label,
+                        value: block,
+                        checked: state.blocks.some((selectedBlock) => selectedBlock.content === block.content),
+                        disabled: block.disabled ? block.disabled : false,
+                    };
+            });
         },
     });
     if (choice)
