@@ -48,7 +48,9 @@ _run the `help` command to view help pages_
 $ npx dotfiles-md --help
 ```
 
-## Writing your Dotfiles in markdown
+## How to write Dotfiles in markdown
+
+> Consult [the included demo](./demo/README.md), which may be easier to understand than the specification below.
 
 **Code block metadata**
 
@@ -57,25 +59,34 @@ Each codeblock is created with three backticks (`) or tildes (~) and assigned a 
     ```<lang> [filePath] [...options]
     ```
 
-This should generally be compatible with other documentation systems.
+_this should generally be compatible with other documentation systems._
 
-The **`<lang>` directive** is the usual markdown code block langauge format. It is used to specify the syntax highlighting of the code snippet but may in the future be used to direct the `action=run` directive.
+The **`<lang>` directive** is the usual markdown code block langauge format. In addition to useful syntax highlighting, this language will determine how to run imperative settings defined with `action=run` (eg. executing scripts).
 
-A **`[filePath]` option** may be provided in order to direct the output of the code block. It **must not** contain an equals sign `=`.
+A **`[filePath]` option** may be provided in order to direct the output of the code block to a file. It **must not** contain an equals sign `=`.
 
-The **`[...options]` array** is a space-delimited list of `key=value` directives defining how the CLI should act on this code block. Values must be quoted if they contain spaces as in, `key="Some Value"`.
+The **`[...options]` array** is a space-delimited list of `key=value` directives defining how the CLI should act on this code block. Values must be quoted if they contain spaces (eg. `title="a fancy title"`).
 
 **Codeblock Options and Actions**
 
-- `action` defines what to do with the content:
-  - `=build`: build the file to `[filePath]`, replacing content as appropriate
+- `action` defines what dotfiles-md will do with the block contents:
+  - `=build`: build the file to `[filePath]`
   - `=run`: run this code block according to the file syntax (js: node, sh, bash, zsh)
   - `=symlink`: find-replace patterns (`%...`) in the codeblock and symlink the result (from `/build`) to `[filePath]`
   - `=section`: use the contents of the code block as a section divider in the CLI
+- `disabled=<string>`: prevent a block code block from being runnable. The `<string>` is displayed in the UI.
 - `title=<string>` a title for the code block to appear in the CLI. `<string>` must be quoted if it contains spaces.
 - `when` defines the availability of this codeblock
-  - `=os.darwin`, `=os.win32`: platform-specific dotfiles
-- `disabled=<string>`: prevent a block code block from being runnable. The `<string>` is displayed in the UI.
+  - `=os.darwin`: the block will only run on MacOS platforms
+  - `=os.win32`: the block will only run on Windows platforms
+
+### Using private `.env` data
+
+If the directory you run `dotfiles-md` from includes a `.env` file, it will be used as a source for replacements in your dotfiles. Prefix your environment variables with `%` in your dotfiles source as in:
+
+* given: an `.env` file containing `S3_BUCKET=my-fancy-bucket`
+* when: dotfiles-md encounters a dotfile containing `%S3_BUCKET`
+* then: dotfiles will replace that string with `my-fancy-bucket`
 
 ## Contributing
 
@@ -101,12 +112,12 @@ npx dotfiles-md --help
 ## Roadmap
 
 - [x] implement `when=<conditions>` (v0.3.0)
-- [x] implement `action=run` (v0.4.6) for imperative settings (see [demo/README.md](demo/README.md))
-- [ ] implement find-replace from `.env` files
-  - idea: command to find all replacement keys in dotfiles (create a `.env.schema` from MD contents) for use with `dotenv-extended`
-- (idea) Title codeblocks from nearest heading (To support spaces and use as fallback for missing `title=`)
+- [x] implement `action=run` (v0.4.6) for imperative settings
+- [x] implement `action=section` for block labelling (v0.6.0)
+- [x] implement find-replace from `.env` files (v0.7.0)
+  - (idea) create sections from nearest doc heading. not sure this is actually more useful than current, but it saves some manual work
 - (idea) Update & Improve Interface UI: 2-panel layout for navigation and show a codeblock
-- (idea) Generate diff when file a exists instead of the current overwrite/backup flow
+- (idea) Generate diff when file a exists instead of the current backup flow
 
 ## FAQ
 
