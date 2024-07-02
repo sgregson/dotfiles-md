@@ -257,12 +257,15 @@ async function inspectMenu() {
     }
 }
 async function makeDotfilesMenu(yargs = {}) {
+    var _a, _b;
     const isAuto = (yargs === null || yargs === void 0 ? void 0 : yargs.dotfile) && (yargs === null || yargs === void 0 ? void 0 : yargs.auto);
     if (isAuto || (await confirm({ message: `Build ${getStatus()}?` }))) {
         console.log(`Building ${getStatus()}:`);
         const now = new Date().toISOString();
+        let prevType = (_a = state.blocks[0].options) === null || _a === void 0 ? void 0 : _a.action;
         for (const [i, block] of Object.entries(state.blocks)) {
-            await executeBlock(now)(block, i);
+            await executeBlock(now)(block, i, prevType);
+            prevType = (_b = block.options) === null || _b === void 0 ? void 0 : _b.action;
         }
         if (isAuto || (await confirm({ message: "exit?" })))
             process.exit(0);

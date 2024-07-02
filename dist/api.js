@@ -155,7 +155,7 @@ export async function getRunnableBlocks(inputFiles, options) {
     }
     return blocks;
 }
-export const executeBlock = (now) => async (block, i) => {
+export const executeBlock = (now) => async (block, i, prevAction = "") => {
     const { options, content: blockContent, lang } = block;
     const buildDir = path.join(process.cwd(), "build", now);
     let targetFile;
@@ -164,6 +164,8 @@ export const executeBlock = (now) => async (block, i) => {
         console.log(`↪ SKIPPED (no action) ${colors.reset(block.label)}`);
         return;
     }
+    if (prevAction !== options.action || options.action === "run")
+        console.log(""); // aesthetic newline between types of actions
     // the output file goes to the target path from where dotfiles-md is run
     if (options === null || options === void 0 ? void 0 : options.targetPath) {
         targetFile = path.resolve(process.cwd(), options.targetPath);
@@ -254,7 +256,7 @@ export const executeBlock = (now) => async (block, i) => {
                 break;
             }
             // ALWAYS CHECK before executing scripts
-            console.log(colors.red(`\n> ${colors.underline(lang)}\n> `) +
+            console.log(colors.red(`> ${colors.underline(lang)}\n> `) +
                 block.content.split("\n").join("\n" + colors.red("> ")));
             const confirmRun = await confirm({ message: "run the above script?" });
             if (confirmRun) {

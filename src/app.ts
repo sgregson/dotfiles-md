@@ -345,8 +345,10 @@ async function makeDotfilesMenu(yargs: Yargs = {}) {
     console.log(`Building ${getStatus()}:`);
     const now = new Date().toISOString();
 
+    let prevType = state.blocks[0].options?.action;
     for (const [i, block] of Object.entries(state.blocks)) {
-      await executeBlock(now)(block, i);
+      await executeBlock(now)(block, i, prevType);
+      prevType = block.options?.action;
     }
 
     if (isAuto || (await confirm({ message: "exit?" }))) process.exit(0);
