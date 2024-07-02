@@ -229,6 +229,14 @@ alias zln='zmv -L'
 The profile file for non-interactive terminal windows. Generally, only put the things in here you'd want to have available to scripts (not open terminal windows)
 
 ```sh $HOME/.zprofile action=symlink title=zprofile
+# Set PATH, MANPATH, etc., for Homebrew.
+# /Users/sgregson/.zprofile:7: no such file or directory: /opt/homebrew/bin/brew
+# eval "$(/usr/local/bin/brew shellenv)"
+eval "$(/opt/homebrew/bin/brew shellenv)"
+
+# source Node Versions
+source $HOME/.custom/fnm.sh 'zprofile'
+
 export PATH="$PATH:$(python3 -m site --user-base)/bin"
 export PATH="$(yarn global bin):$PATH"
 
@@ -239,15 +247,7 @@ export PATH="$PATH":"/Applications/Visual Studio Code.app/Contents/Resources/app
 # export PATH="$HOME/.rbenv/bin:$PATH"
 # eval "$(rbenv init -)"
 
-# Set PATH, MANPATH, etc., for Homebrew.
-# /Users/sgregson/.zprofile:7: no such file or directory: /opt/homebrew/bin/brew
-# eval "$(/usr/local/bin/brew shellenv)"
-eval "$(/opt/homebrew/bin/brew shellenv)"
 
-
-# Enable NVM for sublime plugins
-# source $HOME/.custom/nvm.sh 'zprofile'
-source $HOME/.custom/fnm.sh 'zprofile'
 ```
 
 #### Login Shells(.zshrc)
