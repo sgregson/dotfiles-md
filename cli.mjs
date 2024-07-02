@@ -17,7 +17,7 @@ const args = yargs(hideBin(process.argv))
   .example("DEBUG=true $0", "run with verbose debugging")
   .help("h")
   .alias("h", "help")
-  .version(false)
+  .version()
   .epilog("(GPL 2024)")
   .parse();
 
