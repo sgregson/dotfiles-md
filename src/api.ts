@@ -58,6 +58,12 @@ export interface Block {
   label: string;
 }
 
+class UnreachableCaseError extends Error {
+  constructor(value: never) {
+    super(`Unreachable case: ${value}`);
+  }
+}
+
 const interpreterMap = {
   sh: "sh",
   bash: "bash",
@@ -243,6 +249,9 @@ export const executeBlock = (now: string) => async (block: Block, i) => {
   }
 
   switch (options?.action) {
+    case "section":
+      console.log("\n" + block.label + "\n");
+      break;
     case "build":
       if (!options.targetPath) {
         console.log(`↪ SKIPPED (no targetPath) ${colors.reset(block.label)}`);
@@ -371,6 +380,7 @@ export const executeBlock = (now: string) => async (block: Block, i) => {
       console.log(
         `😬 hang in there, I still have to learn how to ${options?.action} a '${lang}' block.`
       );
+      throw new UnreachableCaseError(options.action);
       break;
   }
 };
@@ -398,7 +408,7 @@ function isDisabled(options: Block["options"]) {
           ? colors.yellow("(when!=os.win32)")
           : false;
       default:
-        break;
+        return `'when=${options.when}' unknown`;
     }
   }
   return false;

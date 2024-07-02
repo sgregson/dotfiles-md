@@ -19,6 +19,11 @@ const env = dotenv.parse(await fsPromises
     .readFile(path.resolve(process.cwd(), ".env"))
     // if file's missing, return nothing
     .catch(() => ""));
+class UnreachableCaseError extends Error {
+    constructor(value) {
+        super(`Unreachable case: ${value}`);
+    }
+}
 const interpreterMap = {
     sh: "sh",
     bash: "bash",
@@ -164,6 +169,9 @@ export const executeBlock = (now) => async (block, i) => {
         targetFile = path.resolve(process.cwd(), options.targetPath);
     }
     switch (options === null || options === void 0 ? void 0 : options.action) {
+        case "section":
+            console.log("\n" + block.label + "\n");
+            break;
         case "build":
             if (!options.targetPath) {
                 console.log(`↪ SKIPPED (no targetPath) ${colors.reset(block.label)}`);
@@ -261,6 +269,7 @@ export const executeBlock = (now) => async (block, i) => {
             break;
         default:
             console.log(`😬 hang in there, I still have to learn how to ${options === null || options === void 0 ? void 0 : options.action} a '${lang}' block.`);
+            throw new UnreachableCaseError(options.action);
             break;
     }
 };
@@ -284,7 +293,7 @@ function isDisabled(options) {
                     ? colors.yellow("(when!=os.win32)")
                     : false;
             default:
-                break;
+                return `'when=${options.when}' unknown`;
         }
     }
     return false;
