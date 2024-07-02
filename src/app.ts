@@ -80,7 +80,10 @@ export async function Run(status: AppStatus, yargs: Yargs = {}) {
   if (!skipOnboarding) {
     // ONBOARDING 3. Standard onboarding
     await pickFilesMenu(yargs);
-    await pickBlocksMenu();
+
+    if (state.files.length > 0) {
+      await pickBlocksMenu();
+    }
   }
 
   // Run the main loop! Loops until we run the exit menu
