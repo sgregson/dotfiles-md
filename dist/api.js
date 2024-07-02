@@ -13,9 +13,9 @@ import { unified } from "unified";
 import remarkParse from "remark-parse";
 import remarkFrontmatter from "remark-frontmatter";
 import remarkGfm from "remark-gfm";
-import remarkFindReplace from "./remarkFindReplace.js";
+import { findReplace } from "./findReplace.js";
 import { confirm } from "@inquirer/prompts";
-const env = dotenv.parse(await fsPromises
+const dotEnvObj = dotenv.parse(await fsPromises
     .readFile(path.resolve(process.cwd(), ".env"))
     // if file's missing, return nothing
     .catch(() => ""));
@@ -30,14 +30,14 @@ const interpreterMap = {
     zsh: "zsh",
     js: "node",
 };
+const injectEnv = findReplace({
+    replacements: dotEnvObj,
+    prefix: "%",
+});
 export const toMdAST = await unified()
     .use(remarkParse)
     .use(remarkFrontmatter)
-    .use(remarkGfm)
-    .use(remarkFindReplace, {
-    replacements: Object.assign(Object.assign({}, env), { PLACEHOLDER: "derpy-do" }),
-    prefix: "%",
-});
+    .use(remarkGfm);
 function DEBUG(str) {
     if (process.env.DEBUG)
         console.log(colors.gray(`(${str})`));
@@ -99,10 +99,10 @@ const homeDirectory = os.homedir();
 export async function getRunnableBlocks(inputFiles, options) {
     let blocks = [];
     for (const filePath of inputFiles) {
-        const fileContent = await fs.readFile(filePath);
-        const theDoc = await toMdAST.parse(fileContent);
+        const fileContent = await fs.readFile(filePath, { encoding: "utf8" });
+        const theDoc = await toMdAST.parse(injectEnv(fileContent));
         blocks = blocks.concat(theDoc.children
-            .filter(({ type }) => type === "code")
+            .filter((block) => block.type === "code")
             .map(({ lang, meta, value }) => {
             var _a, _b, _c, _d, _e;
             const options = Object.fromEntries(
@@ -125,18 +125,18 @@ export async function getRunnableBlocks(inputFiles, options) {
                     label = colors.underline(value !== null && value !== void 0 ? value : meta);
                     break;
                 case "run":
-                    label = `${(_a = options === null || options === void 0 ? void 0 : options.title) !== null && _a !== void 0 ? _a : meta} (${colors.red((_b = options === null || options === void 0 ? void 0 : options.action) !== null && _b !== void 0 ? _b : "")}:${colors.underline(lang)})`;
+                    label = `${(_a = options === null || options === void 0 ? void 0 : options.title) !== null && _a !== void 0 ? _a : meta} (${colors.red((_b = options === null || options === void 0 ? void 0 : options.action) !== null && _b !== void 0 ? _b : "")}:${colors.underline(lang !== null && lang !== void 0 ? lang : "")})`;
                     break;
                 case "build":
                 case "symlink":
                 default:
                     label = `${(_c = options === null || options === void 0 ? void 0 : options.title) !== null && _c !== void 0 ? _c : meta} `
-                        + `(${colors.green((_d = options === null || options === void 0 ? void 0 : options.action) !== null && _d !== void 0 ? _d : "")}:${colors.underline(lang)})`
+                        + `(${colors.green((_d = options === null || options === void 0 ? void 0 : options.action) !== null && _d !== void 0 ? _d : "")}:${colors.underline(lang !== null && lang !== void 0 ? lang : "")})`
                         + ` -> ${(_e = options.targetPath) === null || _e === void 0 ? void 0 : _e.replace(homeDirectory, "~")}`;
             }
             const theBlock = {
-                lang,
-                meta,
+                lang: lang !== null && lang !== void 0 ? lang : "",
+                meta: meta !== null && meta !== void 0 ? meta : "",
                 options,
                 content: value,
                 source: filePath,

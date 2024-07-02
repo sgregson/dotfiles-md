@@ -5,6 +5,8 @@ import fs from "fs-extra";
 import { execa } from "execa";
 import tempWrite from "temp-write";
 
+import { Code } from "mdast";
+
 import path from "path";
 import { fileURLToPath } from "url";
 import parseSentence from "minimist-string";
@@ -15,11 +17,11 @@ import { unified } from "unified";
 import remarkParse from "remark-parse";
 import remarkFrontmatter from "remark-frontmatter";
 import remarkGfm from "remark-gfm";
-import remarkFindReplace from "./remarkFindReplace.js";
+import { findReplace } from "./findReplace.js";
 import { confirm } from "@inquirer/prompts";
 import { SelectOption } from "inquirer-select-pro";
 
-const env = dotenv.parse(
+const dotEnvObj = dotenv.parse(
   await fsPromises
     .readFile(path.resolve(process.cwd(), ".env"))
     // if file's missing, return nothing
@@ -71,14 +73,15 @@ const interpreterMap = {
   js: "node",
 };
 
+const injectEnv = findReplace({
+  replacements: dotEnvObj,
+  prefix: "%",
+});
+
 export const toMdAST = await unified()
   .use(remarkParse)
   .use(remarkFrontmatter)
-  .use(remarkGfm)
-  .use(remarkFindReplace, {
-    replacements: { ...env, PLACEHOLDER: "derpy-do" },
-    prefix: "%",
-  });
+  .use(remarkGfm);
 
 function DEBUG(str) {
   if (process.env.DEBUG) console.log(colors.gray(`(${str})`));
@@ -168,12 +171,12 @@ export async function getRunnableBlocks(
   let blocks: Block[] = [];
 
   for (const filePath of inputFiles) {
-    const fileContent = await fs.readFile(filePath);
-    const theDoc = await toMdAST.parse(fileContent);
+    const fileContent = await fs.readFile(filePath, { encoding: "utf8" });
+    const theDoc = await toMdAST.parse(injectEnv(fileContent));
 
     blocks = blocks.concat(
       theDoc.children
-        .filter(({ type }) => type === "code")
+        .filter((block): block is Code => block.type === "code")
         .map(({ lang, meta, value }) => {
           const options: Block["options"] = Object.fromEntries(
             // minimist parses unknown args into an unknown "_" key
@@ -198,19 +201,19 @@ export async function getRunnableBlocks(
               label = colors.underline(value ?? meta);
               break
             case "run":
-              label = `${options?.title ?? meta} (${colors.red(options?.action??"")}:${colors.underline(lang)})`;
+              label = `${options?.title ?? meta} (${colors.red(options?.action??"")}:${colors.underline(lang ??"")})`;
               break;
             case "build":
             case "symlink":
             default:
               label = `${options?.title ?? meta} `
-                    + `(${colors.green(options?.action??"")}:${colors.underline(lang)})`
+                    + `(${colors.green(options?.action??"")}:${colors.underline(lang ??"")})`
                     + ` -> ${options.targetPath?.replace(homeDirectory, "~")}`;
           }
 
           const theBlock: Block = {
-            lang,
-            meta,
+            lang: lang ?? "",
+            meta: meta ?? "",
             options,
             content: value,
             source: filePath,

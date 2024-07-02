@@ -426,7 +426,7 @@ async function removeSettingsMenu() {
 }
 
 async function preExitMenu() {
-  await saveSettingsMenu();
+  console.log("🚀 until next time…");
 
   process.exit(0);
 }

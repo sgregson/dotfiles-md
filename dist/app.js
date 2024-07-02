@@ -48,7 +48,9 @@ export async function Run(status, yargs = {}) {
     if (!skipOnboarding) {
         // ONBOARDING 3. Standard onboarding
         await pickFilesMenu(yargs);
-        await pickBlocksMenu();
+        if (state.files.length > 0) {
+            await pickBlocksMenu();
+        }
     }
     // Run the main loop! Loops until we run the exit menu
     while (status !== "[exit]") {
@@ -327,6 +329,6 @@ async function removeSettingsMenu() {
         cache.remove();
 }
 async function preExitMenu() {
-    await saveSettingsMenu();
+    console.log("🚀 until next time…");
     process.exit(0);
 }
