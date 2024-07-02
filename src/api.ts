@@ -74,6 +74,10 @@ export const toMdAST = await unified()
     prefix: "%",
   });
 
+function DEBUG(str) {
+  if (process.env.DEBUG) console.log(colors.gray(`(${str})`));
+}
+
 /******************
  * Menu Stuff
  */
@@ -218,7 +222,7 @@ export async function getRunnableBlocks(
 }
 
 export const executeBlock = (now: string) => async (block: Block, i) => {
-  const { options, content, lang } = block;
+  const { options, content: blockContent, lang } = block;
   const buildDir = path.join(process.cwd(), "build", now);
   let targetFile;
 
@@ -228,7 +232,7 @@ export const executeBlock = (now: string) => async (block: Block, i) => {
     return;
   }
 
-  // the file goes to the target path from where dotfiles-md is run
+  // the output file goes to the target path from where dotfiles-md is run
   if (options?.targetPath) {
     targetFile = path.resolve(process.cwd(), options.targetPath);
   }
@@ -242,7 +246,7 @@ export const executeBlock = (now: string) => async (block: Block, i) => {
 
       // make sure the folder is available before writing
       await fs.ensureFile(targetFile);
-      await fs.writeFile(targetFile, content).then(() => {
+      await fs.writeFile(targetFile, blockContent).then(() => {
         console.log(`🔨 built ${path.relative(process.cwd(), targetFile)}`);
       });
       break;
@@ -258,18 +262,22 @@ export const executeBlock = (now: string) => async (block: Block, i) => {
         // named for the originating file, with $i to dedupe multiple symlinks
         `${i}-${path.parse(targetFile).base}`
       );
+
+      // makes sure the directories exist, but doesn't create the file yet
       await fs.ensureDir(path.dirname(buildFile));
       await fs.ensureDir(path.dirname(targetFile));
 
       // 1. build the source file and symlink it
-      await fs.writeFile(buildFile, content).catch(
-        // () =>
-        //   console.log(`🔨 built ${path.relative(process.cwd(), buildFile)}`),
+      DEBUG(`building source file ${buildFile}`);
+      await fs.writeFile(buildFile, blockContent).then(
+        () => {
+          DEBUG(`🔨 built ${path.relative(process.cwd(), buildFile)}`);
+        },
         async (_error) => {
-          console.log("BUILD FAIL");
+          console.log("🚨 Build failure");
           // backup & move old version
           await fs.move(buildFile, buildFile + `.bak-${now}`);
-          await fs.writeFile(buildFile, content);
+          await fs.writeFile(buildFile, blockContent);
         }
       );
 
@@ -278,51 +286,53 @@ export const executeBlock = (now: string) => async (block: Block, i) => {
       const successMsg = `🔗 linked ${targetFile} to ${path.relative(process.cwd(), buildFile)}`
       // prettier-ignore
       const backupMsg = `💾 backup created at ${targetFile + `.bak-${now}`}`;
-      await fs.ensureSymlink(buildFile, targetFile).then(
-        () => console.log(successMsg),
-        async (_error) => {
-          // backup & move old version
-          const oldFile = await fs.readlink(targetFile, {
-            encoding: "utf8",
-          });
-          const oldContent = await fs
-            .readFile(oldFile, {
+
+      // readLink returns the content of the symlink (a path to the source file)
+      const currentSymlink = await fs.readlink(targetFile, {
+        encoding: "utf8",
+      });
+      // readFile returns the actual content (or catches and returns false)
+      const currentSymlinkContent = await fs
+        .readFile(targetFile, { encoding: "utf8" })
+        .catch(() => false as const);
+
+      if (currentSymlink) {
+        DEBUG(`found existing symlink at ${targetFile}`);
+
+        if (
+          currentSymlinkContent !== false &&
+          currentSymlinkContent !== blockContent
+        ) {
+          const backupPath = targetFile + `.bak-${now}`;
+          DEBUG(`writing backing up existing content to ${backupPath}`);
+
+          await fs
+            .writeFile(backupPath, currentSymlinkContent, {
               encoding: "utf8",
             })
-            .catch((_err) => console.log("failed to read old content"));
-
-          // if the content differs, flatten the symlink and back it up before removing
-          if (
-            oldContent &&
-            (await fs.readFile(buildFile, {
-              encoding: "utf8",
-            })) !== oldContent
-          ) {
-            await fs
-              .writeFile(targetFile + `.bak-${now}`, oldContent, {
-                encoding: "utf8",
-              })
-              .then(() => console.log(backupMsg))
-              .catch((err) =>
-                console.log(
-                  `🚧 failed to write ${targetFile} backup (${err.code}). Refer to old content at ${oldFile}`
-                )
-              );
-          }
-
-          await fs
-            .remove(targetFile)
-            .catch(() => `failed to remove old file ${targetFile}`);
-
-          await fs
-            .ensureSymlink(buildFile, targetFile)
-            .then(() => console.log(successMsg))
-            .catch((err) => {
-              console.log(`🚧 failed to create symlink at ${targetFile}`);
-              console.log(err);
-            });
+            .then(() => console.log(backupMsg))
+            .catch((err) =>
+              console.log(
+                `🚧 failed to write ${backupPath} (${err.code}). Refer to old content at ${currentSymlinkContent}`
+              )
+            );
         }
-      );
+
+        DEBUG(`removing ${targetFile}`);
+        await fs
+          .remove(targetFile)
+          .catch(() => `Failed to remove old file ${targetFile}`);
+      }
+
+      DEBUG(`creating symlink`);
+      await fs
+        .ensureSymlink(buildFile, targetFile)
+        .then(() => console.log(successMsg))
+        .catch((err) => {
+          console.log(`🚧 failed to create symlink at ${targetFile}`);
+          console.log(err);
+        });
+
       break;
     case "run":
       if (!Object.keys(interpreterMap).includes(lang)) {
