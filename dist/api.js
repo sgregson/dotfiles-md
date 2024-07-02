@@ -197,8 +197,12 @@ export const executeBlock = (now) => async (block, i) => {
             // prettier-ignore
             const backupMsg = `💾 backup created at ${targetFile + `.bak-${now}`}`;
             // readLink returns the content of the symlink (a path to the source file)
-            const currentSymlink = await fs.readlink(targetFile, {
+            const currentSymlink = await fs
+                .readlink(targetFile, {
                 encoding: "utf8",
+            })
+                .catch(() => {
+                DEBUG(`no existing symlink`);
             });
             // readFile returns the actual content (or catches and returns false)
             const currentSymlinkContent = await fs
@@ -217,7 +221,7 @@ export const executeBlock = (now) => async (block, i) => {
                         .then(() => console.log(backupMsg))
                         .catch((err) => console.log(`🚧 failed to write ${backupPath} (${err.code}). Refer to old content at ${currentSymlinkContent}`));
                 }
-                DEBUG(`removing ${targetFile}`);
+                DEBUG(`🗑️ removing ${targetFile}`);
                 await fs
                     .remove(targetFile)
                     .catch(() => `Failed to remove old file ${targetFile}`);
