@@ -1,28 +1,26 @@
-import * as dotenv from "dotenv";
-import { promises as fsPromises } from "fs";
 import os from "os";
 import fs from "fs-extra";
-import { execa } from "execa";
-import tempWrite from "temp-write";
-
-import { Code } from "mdast";
-
 import path from "path";
-import { fileURLToPath } from "url";
-import parseSentence from "minimist-string";
+import { execa } from "execa";
 import glob from "glob";
+import * as dotenv from "dotenv";
+import tempWrite from "temp-write";
+import { fileURLToPath } from "url";
 
-import colors from "colors/safe.js";
 import { unified } from "unified";
+import parseSentence from "minimist-string";
+import { Code } from "mdast";
 import remarkParse from "remark-parse";
 import remarkFrontmatter from "remark-frontmatter";
 import remarkGfm from "remark-gfm";
 import { findReplace } from "./findReplace.js";
+
+import colors from "colors/safe.js";
 import { confirm } from "@inquirer/prompts";
 import { SelectOption } from "inquirer-select-pro";
 
 const dotEnvObj = dotenv.parse(
-  await fsPromises
+  await fs
     .readFile(path.resolve(process.cwd(), ".env"))
     // if file's missing, return nothing
     .catch(() => "")
@@ -374,6 +372,7 @@ export const executeBlock =
           colors.red(`> ${colors.underline(lang)}\n> `) +
             block.content.split("\n").join("\n" + colors.red("> "))
         );
+
         const confirmRun = await confirm({ message: "run the above script?" });
         if (confirmRun) {
           const tempFile = await tempWrite(block.content, "script.sh");

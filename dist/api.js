@@ -1,21 +1,20 @@
-import * as dotenv from "dotenv";
-import { promises as fsPromises } from "fs";
 import os from "os";
 import fs from "fs-extra";
-import { execa } from "execa";
-import tempWrite from "temp-write";
 import path from "path";
-import { fileURLToPath } from "url";
-import parseSentence from "minimist-string";
+import { execa } from "execa";
 import glob from "glob";
-import colors from "colors/safe.js";
+import * as dotenv from "dotenv";
+import tempWrite from "temp-write";
+import { fileURLToPath } from "url";
 import { unified } from "unified";
+import parseSentence from "minimist-string";
 import remarkParse from "remark-parse";
 import remarkFrontmatter from "remark-frontmatter";
 import remarkGfm from "remark-gfm";
 import { findReplace } from "./findReplace.js";
+import colors from "colors/safe.js";
 import { confirm } from "@inquirer/prompts";
-const dotEnvObj = dotenv.parse(await fsPromises
+const dotEnvObj = dotenv.parse(await fs
     .readFile(path.resolve(process.cwd(), ".env"))
     // if file's missing, return nothing
     .catch(() => ""));
