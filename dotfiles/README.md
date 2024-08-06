@@ -943,7 +943,7 @@ defaults write NSGlobalDomain WebKitDeveloperExtras -bool true;
 ### Phoenix JS Window Managment
 
 ```js $HOME/.phoenix.js action=symlink title="Phoenix.js window config" when=os.darwin
-/// <reference path="../../../types/phoenix.d.ts" />
+/// <reference path="../../../../types/phoenix.d.ts" />
 "use strict";
 /*globals Phoenix Window App Key Screen Space*/
 Phoenix.notify("initializing");
@@ -1019,7 +1019,7 @@ Key.on(",", HYPER, () => logged(stateToggle)(["left-2/3"]));
 Key.on(".", HYPER, () => logged(stateToggle)(["right-3"]));
 
 // move to next screen
-Key.on("[", HYPER, () => logged(moveToNextScreen)());
+Key.on("[", HYPER, () => logged(moveToPrevScreen)());
 Key.on("]", HYPER, () => logged(moveToNextScreen)());
 
 // Window layout
@@ -1183,12 +1183,25 @@ function dblKeyPress(key, meta, fn, timers = []) {
  * @param  {Array}  _tests      list of [x,width] tuples to iterate through for matching & assigning
  * @return {null}
  */
-function stateToggle(_tests, _win = Window.focused()) {
+function stateToggle(_tests, options = {}) {
+  let { window: _win, screen: _screen } = options;
+
+  if (!_win) {
+    _win = Window.focused();
+    Phoenix.log("falling back to focused window");
+  }
+  if (!_screen) _screen = _win.screen();
+
+  Phoenix.log(
+    "using frame: ",
+    JSON.stringify(Window.focused().screen().frame())
+  );
+
   // TODO: "if there's another screen, push a state from the next screen into it"
   _tests.push(_tests[0]); // permit wrapping states [l,f,r,l]
 
   // const _win = Window.focused();
-  const regions = getRegions(_win.screen());
+  const regions = getRegions(_screen);
 
   // current state initialized to "unmatched"
   let currentState = -1;
@@ -1395,10 +1408,15 @@ function moveToSpace(slot, { window }) {
 /**
  * moves the current window to the next screen
  */
+function moveToPrevScreen() {
+  stateToggle(["full"], { screen: Window.focused().screen().previous() });
+}
+
+/**
+ * moves the current window to the next screen
+ */
 function moveToNextScreen() {
-  const _win = Window.focused();
-  _win.setFrame(_win.screen().next().frame());
-  stateToggle(["full"]);
+  stateToggle(["full"], { screen: Window.focused().screen().next() });
 }
 
 /**
