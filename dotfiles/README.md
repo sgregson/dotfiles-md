@@ -388,7 +388,7 @@ alias jfdi="pushd ~/Code/dotfiles-md/ && yarn jfdi && popd"
   ram             = ! git fetch && git rebase origin/master
 
   # making fixes and patches
-  fixup = "!git log -n 50 --pretty=format:'%h %s' --no-merges | fzf | cut -c -7 | xargs -o git commit --fixup"
+  fixup = "!git log -n 50 --author=$(git config --get user.email) --pretty=format:'%h %s' --no-merges | fzf | cut -c -7 | xargs -o git commit --fixup"
   autosquash = "!git rebase -i --autosquash $(git merge-base origin/main HEAD)"
 
   pop = "!git stash list | fzf | cut -d':' -f1 | xargs -o git stash pop"
