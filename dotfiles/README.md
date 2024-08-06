@@ -158,6 +158,7 @@ brew install meetingbar;
 # brew install mr;
 # brew install pinentry-mac;                  # GPG Pinentry command
 # brew install rbenv;                         # replaced by asdf
+brew install ripgrep;
 brew install spark;                           # sparklines ▁▁▂▃▄▅▆▇█ in terminal
 brew install whereami;
 # brew install zsh;
