@@ -146,6 +146,7 @@ brew install deno;
 brew install fzf;
 brew install fnm;
 brew install gitleaks;                        # secret scanning for git repos
+brew install git-machete;                     # tool for stacked PRs and git development
 brew install gh;                              # github CLI
 brew install imgcat;
 # brew install jppoeyhoer/extras/gzthermal;   # 💀 appears dead
@@ -280,6 +281,7 @@ export PATH="$(yarn global bin):$PATH"
 
 ```sh $HOME/.custom/aliases.sh action=symlink title="Shell Aliases, git etc"
 alias g="git"
+alias gm="git machete"
 alias gf="git fetch"
 # alias go="git checkout"
 alias gs="git status"
