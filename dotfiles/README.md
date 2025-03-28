@@ -242,8 +242,8 @@ eval "$(/opt/homebrew/bin/brew shellenv)"
 # source Node Versions
 source $HOME/.custom/fnm.sh 'zprofile'
 
-export PATH="$PATH:$(python3 -m site --user-base)/bin"
-export PATH="$(yarn global bin):$PATH"
+# export PATH="$PATH:$(python3 -m site --user-base)/bin"
+# export PATH="$(yarn global bin):$PATH"
 
 # Add Visual Studio Code (code)
 export PATH="$PATH":"/Applications/Visual Studio Code.app/Contents/Resources/app/bin"
@@ -276,7 +276,7 @@ source <(fzf --zsh)
 source "$(brew --prefix asdf)/libexec/asdf.sh"
 
 ## Support yarn global binaries
-export PATH="$(yarn global bin):$PATH"
+# export PATH="$(yarn global bin):$PATH"
 ```
 
 
