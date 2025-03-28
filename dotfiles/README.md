@@ -116,13 +116,14 @@ alias wayproxy="docker run --rm -p 443:443 -v ~/.local-certs:/certs wayfair/loca
 echo "...fetch env"
 
 # https://rossedman.io/blog/computers/setting-env-vars-from-1password/
-export MAPBOX_ACCESS_TOKEN=$(op read op://Personal/MAPBOX_ACCESS_TOKEN/password)
-export DAISYDISK_LICENSE=$(op read op://Personal/DAISYDISK_LICENSE/password)
-export BUNDLE_GEMS__GRAPHQL__PRO=$(op read op://huntclub/graphql-pro/password)
+# op signin --account my.1password.com [VaultName]
+export MAPBOX_ACCESS_TOKEN=$(op read --account       my.1password.com op://Personal/MAPBOX_ACCESS_TOKEN/password)
+export DAISYDISK_LICENSE=$(op read --account         my.1password.com op://Personal/DAISYDISK_LICENSE/password)
+export BUNDLE_GEMS__GRAPHQL__PRO=$(op read --account my.1password.com op://huntclub/graphql-pro/password)
 
 # apply the sublimerge licence
 if [ -d "$HOME/Library/Application Support/Sublime Text 3/" ]; then
-  echo "{\"key\": \"$(op read op://Personal/SUBLIMERGE_LICENSE/password)\"" > "$HOME/Library/Application Support/Sublime Text 3/Packages/User/Sublimerge.sublime-license"
+  echo "{\"key\": \"$(op read --account             my.1password.com op://Personal/SUBLIMERGE_LICENSE/password)\"" > "$HOME/Library/Application Support/Sublime Text 3/Packages/User/Sublimerge.sublime-license"
 fi
 ```
 
