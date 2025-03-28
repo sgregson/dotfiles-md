@@ -411,7 +411,9 @@ alias jfdi="pushd ~/Code/dotfiles-md/ && yarn jfdi && popd"
   diffstat        = diff --stat -r
   diff-lessnode   = "! git diff --diff-filter=MAd origin/master...HEAD --name-only | grep -v '^node_modules/' | xargs git diff $MERGE_BASE --full-index"
   u-stat          = "! git diff -M --full-index origin/main...HEAD --stat"
-  u-stat-open     = "! git diff -M --diff-filter=MAd --full-index origin/main...HEAD --name-status | grep -o \"[a-z\\.\\/_A-Z0-9]\\{2,\\}\" | xargs code -a"
+  us              = u-stat
+  u-stat-open     = "! git diff -M --diff-filter=MAd --full-index origin/main...HEAD --name-status | grep '^[MA]' | awk '{print $2}' | xargs code -a"
+  uso             = u-stat-open
   # BRANCHES
   bd              = "for-each-ref --sort=committerdate refs/heads/ --format='%1B[0;31m%(committerdate:relative)%1B[m%09%(refname:short) [%1B[1;34m%(upstream:short)%1B[m]'"
   todo            = branch --no-merged
