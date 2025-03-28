@@ -132,6 +132,7 @@ fi
 ```sh action=run title="Homebrew taps" when=os.darwin
 # brew tap buildkite/cli
 # brew tap caskroom/fonts;
+brew tap dimentium/autoraise;                 # source for AutoRaise app
 brew tap homebrew/bundle;
 brew tap ikuwow/imgcat;
 # brew tap joeyhoer/extras;                   # 💀 appears dead
@@ -167,6 +168,7 @@ brew install zsh-completions;
 ```
 
 ```sh action=run title="Homebrew casks" when=os.darwin
+brew install --cask dimentium/autoraise/autoraiseapp;
 brew install --cask 1password-cli;            # secrets and password management
 brew install --cask alfred;
 brew install --cask cleanshot;                # great screenshot tool
@@ -537,6 +539,26 @@ Host *
 
 ```md action=section
 # App Configurations
+```
+
+### AutoRaise
+
+```ini $HOME/.config/AutoRaise/config title="AutoRaise config settings" action=build
+#AutoRaise config file
+pollMillis=50
+delay=2
+focusDelay=0
+warpX=1
+warpY=1
+scale=2.5
+altTaskSwitcher=false
+ignoreSpaceChanged=false
+invertIgnoreApps=false
+#ignoreApps="IntelliJ IDEA,WebStorm"
+#ignoreTitles="\\s\\| Microsoft Teams,..."
+#stayFocusedBundleIds="com.apple.SecurityAgent,..."
+#disableKey="control"
+mouseDelta=0.1
 ```
 
 ### Git stats
