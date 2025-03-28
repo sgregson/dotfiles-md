@@ -927,6 +927,11 @@ defaults write -g ApplePressAndHoldEnabled -bool false;
 defaults write NSGlobalDomain KeyRepeat -int 1;
 ```
 
+```sh title="MacOS Task Switcher on All Screens" action=run when=os.darwin
+defaults write com.apple.dock appswitcher-all-displays -bool true
+killall Dock;
+```
+
 ### Keyboard setup
 
 ```sh title="Finder Settings" action=run when=os.darwin
