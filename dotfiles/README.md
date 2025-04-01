@@ -112,7 +112,6 @@ alias wayproxy="docker run --rm -p 443:443 -v ~/.local-certs:/certs wayfair/loca
 
 ```sh $HOME/.custom/env.sh action=symlink title="private environment variables"
 # Manage environment variables with 1Password CLI (was installed via homebrew)
-# op signin [VaultName]
 echo "...fetch env"
 
 # https://rossedman.io/blog/computers/setting-env-vars-from-1password/
@@ -162,6 +161,7 @@ brew install meetingbar;
 # brew install rbenv;                         # replaced by asdf
 brew install ripgrep;
 brew install spark;                           # sparklines ▁▁▂▃▄▅▆▇█ in terminal
+brew install starship;
 brew install whereami;
 # brew install zsh;
 brew install zsh-completions;
@@ -274,6 +274,9 @@ source <(fzf --zsh)
 
 # load ASDF tool
 source "$(brew --prefix asdf)/libexec/asdf.sh"
+
+# Use the Starship shell prompt
+eval "$(starship init zsh)"
 
 ## Support yarn global binaries
 # export PATH="$(yarn global bin):$PATH"
