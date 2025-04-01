@@ -276,6 +276,7 @@ source <(fzf --zsh)
 source "$(brew --prefix asdf)/libexec/asdf.sh"
 
 # Use the Starship shell prompt
+# May require a nerd font patched font https://www.nerdfonts.com/font-downloads
 eval "$(starship init zsh)"
 
 ## Support yarn global binaries
