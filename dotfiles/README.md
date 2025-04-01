@@ -282,8 +282,8 @@ eval "$(starship init zsh)"
 # export PATH="$(yarn global bin):$PATH"
 ```
 
-
 ### Aliases
+
 `gs` and `gdc` are in daily use
 
 ```sh $HOME/.custom/aliases.sh action=symlink title="Shell Aliases, git etc"
@@ -300,6 +300,7 @@ alias jfdi="pushd ~/Code/dotfiles-md/ && yarn jfdi && popd"
 ```
 
 ## git
+
 ```md action=section
 # Git
 ```
@@ -471,7 +472,6 @@ desktop.ini
 .DS_Store
 ```
 
-
 ### Git Stats
 
 You can use https://github.com/IonicaBizau/git-stats to keep track of your git stats locally...
@@ -494,6 +494,7 @@ module.exports = {
   global_activity: false,
 };
 ```
+
 ### GPG
 
 > https://docs.github.com/en/authentication/managing-commit-signature-verification/checking-for-existing-gpg-keys
@@ -507,6 +508,7 @@ git config --global --unset gpg.format
 gpg --list-secret-keys --keyid-format=long
 git config --global user.signingkey #############
 ```
+
 From [pinentry-touchid](https://github.com/jorgelbg/pinentry-touchid) I don't want to save my GPG key in keychain:
 
 ```sh action=run title="Disable Save GPG To Keychain"
@@ -538,7 +540,6 @@ Host *.wf-gcp-us-sds-prod.internal
 Host *
     IdentityAgent "~/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock"
 ```
-
 
 ## App Configs
 
@@ -688,7 +689,6 @@ module.exports = {
 };
 ```
 
-
 ### Jrnl
 
 ```yaml $HOME/.config/jrnl/jrnl.yaml title="JRNL command line settings" action=build disabled=legacy
@@ -708,9 +708,9 @@ module.exports = {
 
 Preview markdown files in MacOS quicklook (finder spacebar) https://github.com/sbarex/QLMarkdown
 
-
 > TODO: need to implement dark color scheme `prefers-color-scheme: dark`
 
+<!-- prettier-ignore -->
 ```css $HOME/qlmarkdown-style.css action=symlink title="Markdown QuickLook styles"
 html,body{color:black}
 *{margin:0;padding:0}
@@ -920,6 +920,7 @@ reloadTabs() {
 ```
 
 ## MacOS System Config
+
 ```md action=section
 # MacOS System
 ```
