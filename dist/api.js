@@ -24,10 +24,10 @@ class UnreachableCaseError extends Error {
     }
 }
 const interpreterMap = {
-    sh: "sh",
-    bash: "bash",
-    zsh: "zsh",
-    js: "node",
+    sh: { interpreter: "sh", commentChar: "#" },
+    bash: { interpreter: "bash", commentChar: "#" },
+    zsh: { interpreter: "zsh", commentChar: "#" },
+    js: { interpreter: "node", commentChar: "//" },
 };
 const injectEnv = findReplace({
     replacements: dotEnvObj,
@@ -256,7 +256,12 @@ export const executeBlock = (now) => async (block, i, prevAction = "") => {
             }
             // ALWAYS CHECK before executing scripts
             console.log(colors.red(`> ${colors.underline(lang)}\n> `) +
-                block.content.split("\n").join("\n" + colors.red("> ")));
+                block.content
+                    .split("\n")
+                    .map((line) => line.startsWith(interpreterMap[lang].commentChar)
+                    ? colors.grey(line)
+                    : line)
+                    .join("\n" + colors.red("> ")));
             const confirmRun = await confirm({ message: "run the above script?" });
             if (confirmRun) {
                 const tempFile = await tempWrite(block.content, "script.sh");
@@ -265,7 +270,7 @@ export const executeBlock = (now) => async (block, i, prevAction = "") => {
                     stdout: "inherit",
                     stderr: "inherit",
                     reject: false,
-                }) `${interpreterMap[lang]} ${tempFile}`;
+                }) `${interpreterMap[lang].interpreter} ${tempFile}`;
             }
             break;
         default:
