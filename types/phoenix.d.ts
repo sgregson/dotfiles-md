@@ -1,6 +1,5 @@
 /**
  * Phoenix (kasper/phoenix) typings for TypeScript.
- * https://raw.githubusercontent.com/mafredri/phoenix-typings/main/index.d.ts
  */
 
 interface Error {
@@ -502,7 +501,7 @@ interface Window extends Phoenix.Identifiable {
   close(): boolean;
 }
 
-interface WindowObject {
+interface WindowObject extends Window {
   prototype: Window;
 
   /**
@@ -728,7 +727,12 @@ interface TimerObject {
    * a reference to the handler in order for your callback to get called, the
    * callback function receives its handler as the only argument.
    */
-  new (interval: number, callback: (handler: Timer) => void): Timer;
+  new (
+    interval: number,
+    repeats: boolean,
+    callback: (handler: Timer) => void
+  ): Timer;
+
   prototype: Timer;
 
   /**

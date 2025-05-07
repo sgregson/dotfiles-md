@@ -132,7 +132,6 @@ fi
 # brew tap buildkite/cli
 # brew tap caskroom/fonts;
 brew tap dimentium/autoraise;                 # source for AutoRaise app
-brew tap homebrew/bundle;
 brew tap ikuwow/imgcat;
 # brew tap joeyhoer/extras;                   # 💀 appears dead
 brew tap mapbox/cli;
@@ -146,6 +145,7 @@ brew install bk;
 brew install deno;
 brew install fzf;
 brew install fnm;
+brew install gifsicle;                        # size/scale/edit gifs for length+quality
 brew install gitleaks;                        # secret scanning for git repos
 brew install git-machete;                     # tool for stacked PRs and git development
 brew install gh;                              # github CLI
@@ -360,6 +360,9 @@ alias jfdi="pushd ~/Code/dotfiles-md/ && yarn jfdi && popd"
   conflictstyle = diff3
   tool = vscode
   keepBackup = false
+[merge "theirs"]
+  name = use-theirs merge driver
+  driver = cp %B %A
 [mergetool]
   prompt = false
   keepBackup = false
@@ -1061,10 +1064,10 @@ Key.on("[", HYPER, () => logged(moveToPrevScreen)());
 Key.on("]", HYPER, () => logged(moveToNextScreen)());
 
 // Window layout
-const onScreenChange = new Event("screensDidChange", () =>
-  // needs to wait for MacOS to mess everything up first
-  Timer.after(3, () => logged(triggerLayout)())
-);
+// const onScreenChange = new Event("screensDidChange", () =>
+//   // needs to wait for MacOS to mess everything up first
+//   Timer.after(3, () => logged(triggerLayout)())
+// );
 
 Key.on("keypad*", HYPER, () => {
   // https://itectec.com/askdifferent/macos-create-a-new-space-using-a-keyboard-shortcut/

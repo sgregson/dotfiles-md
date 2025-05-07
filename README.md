@@ -14,7 +14,6 @@
 
 </details>
 
-
 [![GPLv3 License](https://img.shields.io/badge/License-GPL%20v3-yellow.svg)](https://opensource.org/licenses/)
 
 # dotfiles-md
@@ -22,6 +21,7 @@
 Maintain your system configuration as a collection of installable markdown blocks
 
 ## Usage
+
 > _**Requires:** node.js_. See [contributing] for instructions on installing a local copy
 
 Simply navigate to your folder of markdown and then run the interactive CLI:
@@ -56,8 +56,11 @@ $ npx dotfiles-md --help
 
 Each codeblock is created with three backticks (`) or tildes (~) and assigned a **space-delimited** collection of metadata:
 
-    ```<lang> [filePath] [...options]
-    ```
+````md
+```<lang> [filePath] [...options]
+[contents]
+```
+````
 
 _this should generally be compatible with other documentation systems._
 
@@ -66,6 +69,8 @@ The **`<lang>` directive** is the usual markdown code block langauge format. In 
 A **`[filePath]` option** may be provided in order to direct the output of the code block to a file. It **must not** contain an equals sign `=`.
 
 The **`[...options]` array** is a space-delimited list of `key=value` directives defining how the CLI should act on this code block. Values must be quoted if they contain spaces (eg. `title="a fancy title"`).
+
+The **`[contents]`** of the codeblock are acted on according to the options list, particularly the "action" flag.
 
 **Codeblock Options and Actions**
 
@@ -84,9 +89,9 @@ The **`[...options]` array** is a space-delimited list of `key=value` directives
 
 If the directory you run `dotfiles-md` from includes a `.env` file, it will be used as a source for replacements in your dotfiles. Prefix your environment variables with `%` in your dotfiles source as in:
 
-* given: an `.env` file containing `S3_BUCKET=my-fancy-bucket`
-* when: dotfiles-md encounters a dotfile containing `%S3_BUCKET`
-* then: dotfiles will replace that string with `my-fancy-bucket`
+- given: an `.env` file containing `S3_BUCKET=my-fancy-bucket`
+- when: dotfiles-md encounters a dotfile containing `%S3_BUCKET`
+- then: dotfiles will replace that string with `my-fancy-bucket`
 
 ## Contributing
 
