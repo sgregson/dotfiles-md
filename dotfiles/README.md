@@ -192,6 +192,7 @@ brew install --cask spotify;
 # brew install --cask steam;
 brew install --cask unnaturalscrollwheels;    # generally more reliable than scroll-reverser
 brew install --cask visual-studio-code;
+brew install --cask warp                      # warp terminal
 ```
 
 ```sh $HOME/.custom/gcloud-brew.sh action=symlink title="google cloud sdk completions" when=os.darwin
@@ -1005,7 +1006,7 @@ const lastPressTime = new Map();
 // Application aliases
 var BROWSER = "Brave Browser";
 var EDITOR = "Code";
-var TERMINAL = "iTerm2";
+var TERMINAL = "Warp";
 var CHAT = "Slack";
 var NOTES = "Notion";
 var PLAYER = "Spotify";
