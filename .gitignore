@@ -1,6 +1,10 @@
-node_modules/
-.env
+# OS
+.DS_Store
 
-**/build/
+# App
 .dotfiles-md-cache
-playground/
+.env
+**/build/
+
+# Dependencies
+node_modules/
