@@ -1,7 +1,7 @@
 import os from "os";
 import fs from "fs-extra";
 import path from "path";
-import { execa } from "execa";
+import { execa, ExecaError } from "execa";
 import glob from "glob";
 import * as dotenv from "dotenv";
 import tempWrite from "temp-write";
@@ -381,14 +381,26 @@ export const executeBlock =
         );
 
         const confirmRun = await confirm({ message: "run the above script?" });
+
         if (confirmRun) {
+          /** Create a temporary file for the script and run it */
           const tempFile = await tempWrite(block.content, "script.sh");
           await execa`chmod +x ${tempFile}`;
-          await execa({
-            stdout: "inherit",
-            stderr: "inherit",
-            reject: false,
-          })`${interpreterMap[lang].interpreter} ${tempFile}`;
+
+          // If the script fails, catch the error and let the user decide whether to continue
+          try {
+            await execa({
+              stdout: "inherit",
+              stderr: "inherit",
+            })`${interpreterMap[lang].interpreter} ${tempFile}`;
+          } catch (error) {
+            if (error instanceof ExecaError) {
+              console.error(
+                colors.red(`🚨 Error executing script: ${error.shortMessage}`)
+              );
+              await confirm({ message: "Do you want to continue?" });
+            }
+          }
         }
         break;
       default:
