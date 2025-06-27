@@ -27,7 +27,7 @@
     "prerelease": "! find . -path './node_modules' -prune -o -type l -print | grep .",
     "release": "np",
     "prejfdi": "yarn",
-    "jfdi": "cd dotfiles; npx .. --auto README.md; cd -",
+    "dev": "tsc --watch",
     "app": "node ./src/app.js",
     "start": "node ./cli.mjs",
     "test": "yarn tsc && echo \"STATUS: no test specified\"",
