@@ -259,7 +259,11 @@ async function inspectMenu() {
 async function makeDotfilesMenu(yargs = {}) {
     var _a, _b;
     const isAuto = (yargs === null || yargs === void 0 ? void 0 : yargs.dotfile) && (yargs === null || yargs === void 0 ? void 0 : yargs.auto);
-    if (isAuto || (await confirm({ message: `Build ${getStatus()}?` }))) {
+    if (state.blocks.length === 0) {
+        await sleep(500);
+        console.log(colors.red("(no blocks selected)"));
+    }
+    else if (isAuto || (await confirm({ message: `Build ${getStatus()}?` }))) {
         console.log(`Building ${getStatus()}:`);
         const now = new Date().toISOString();
         let prevType = (_a = state.blocks[0].options) === null || _a === void 0 ? void 0 : _a.action;
