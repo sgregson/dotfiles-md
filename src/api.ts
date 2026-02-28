@@ -8,7 +8,7 @@ import tempWrite from "temp-write";
 import { fileURLToPath } from "url";
 
 import { unified } from "unified";
-import parseSentence from "minimist-string";
+import parseArgsStringToArgv from "string-argv";
 import { Code } from "mdast";
 import remarkParse from "remark-parse";
 import remarkFrontmatter from "remark-frontmatter";
@@ -177,9 +177,9 @@ export async function getRunnableBlocks(
         .filter((block): block is Code => block.type === "code")
         .map(({ lang, meta, value }) => {
           const options: Block["options"] = Object.fromEntries(
-            // minimist parses unknown args into an unknown "_" key
-            // and all args we have are technically unknown
-            parseSentence(meta ?? "")["_"].map((opt) => {
+            // split the meta string into shell-like argv tokens (preserves quoted values)
+            // then map tokens into key/value pairs (tokens without '=' become a targetPath)
+            parseArgsStringToArgv(meta ?? "").map((opt) => {
               if (!opt.includes("=")) {
                 // the only option missing a "=" is the filePath
                 return [
@@ -188,7 +188,10 @@ export async function getRunnableBlocks(
                 ];
               }
 
-              return opt.split("=");
+              // split into key/value and strip any surrounding quotes from the value
+              const [key, raw] = opt.split("=");
+              const value = raw.replace(/^(["'])(.*)\1$/, "$2");
+              return [key, value];
             })
           );
 
