@@ -42,7 +42,7 @@
     "message": "Release %s"
   },
   "dependencies": {
-    "@inquirer/prompts": "^5.0.7",
+    "@inquirer/prompts": "^8.0.0",
     "colors": "^1.4.0",
     "dotenv": "^16.0.3",
     "escape-string-regexp": "^5.0.0",

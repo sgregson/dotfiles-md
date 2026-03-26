@@ -1,4 +1,5 @@
-import { confirm, select, Separator } from "@inquirer/prompts";
+import { confirm, select } from "@inquirer/prompts";
+import { Separator } from "inquirer-select-pro";
 import {
   globAsync,
   getRunnableBlocks,
